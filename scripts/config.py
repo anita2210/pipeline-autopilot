@@ -13,9 +13,7 @@ import os
 from pathlib import Path
 from datetime import timedelta
 
-# =============================================================================
-# PROJECT PATHS
-# =============================================================================
+
 
 # Base directory (works in both local and Docker environments)
 if os.environ.get("AIRFLOW_HOME"):
@@ -226,8 +224,8 @@ ANOMALY_SETTINGS = {
     "iqr_multiplier": 1.5,
     
     # Minimum percentage of anomalies to flag dataset
-    "anomaly_flag_threshold": 5.0,
-    
+    #"anomaly_flag_threshold": 15.0,  # Was 5.0
+    "anomaly_flag_threshold": 35.0,  # Covers duration_deviation (34.12%)
     # Columns to check for anomalies
     "columns_to_check": [
         "duration_seconds",

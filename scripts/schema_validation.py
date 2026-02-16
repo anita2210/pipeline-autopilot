@@ -95,7 +95,8 @@ def generate_statistics(df: pd.DataFrame) -> dict:
                 "missing": int(df[col].isna().sum()),
                 "missing_percent": round(df[col].isna().sum() / len(df) * 100, 2),
                 "unique_count": int(df[col].nunique()),
-                "unique_values": df[col].dropna().unique().tolist()[:50],  # Top 50 unique values
+                #"unique_values": df[col].dropna().unique().tolist()[:50],  # Top 50 unique values
+                "unique_values": df[col].dropna().unique().tolist(),  # All unique values
                 "top_value": str(value_counts.index[0]) if len(value_counts) > 0 else None,
                 "top_frequency": int(value_counts.iloc[0]) if len(value_counts) > 0 else 0,
             }
