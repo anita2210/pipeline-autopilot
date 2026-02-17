@@ -5,7 +5,7 @@ Central configuration file for Pipeline Autopilot.
 Contains all paths, column definitions, validation rules, and settings.
 
 Author: Member 1 (Pipeline Architect)
-Date: February 2026
+Updated: February 2026 (Added Member 3's preprocessing requirements)
 Project: Pipeline Autopilot - CI/CD Failure Prediction System
 """
 
@@ -43,10 +43,12 @@ DAGS_DIR = BASE_DIR / "dags"
 # =============================================================================
 
 # Input files
-RAW_DATASET_PATH = RAW_DATA_DIR / "final_dataset.csv"
+RAW_DATA_FILE = RAW_DATA_DIR / "final_dataset.csv"
+RAW_DATASET_PATH = RAW_DATA_FILE  # Alias for backward compatibility
 
-# Output files
-PROCESSED_DATASET_PATH = PROCESSED_DATA_DIR / "processed_dataset.csv"
+# Output files (Updated for Member 3's preprocessing)
+PROCESSED_DATA_FILE = PROCESSED_DATA_DIR / "final_dataset_processed.csv"
+PROCESSED_DATASET_PATH = PROCESSED_DATA_FILE  # Alias for backward compatibility
 TRAIN_DATASET_PATH = PROCESSED_DATA_DIR / "train_dataset.csv"
 TEST_DATASET_PATH = PROCESSED_DATA_DIR / "test_dataset.csv"
 
@@ -58,6 +60,7 @@ VALIDATION_REPORT_PATH = SCHEMA_DIR / "validation_report.json"
 ANOMALY_REPORT_PATH = REPORTS_DIR / "anomaly_report.json"
 BIAS_REPORT_PATH = REPORTS_DIR / "bias_report.json"
 PIPELINE_REPORT_PATH = REPORTS_DIR / "pipeline_report.json"
+PREPROCESSING_REPORT_PATH = REPORTS_DIR / "preprocessing_report.json"
 
 # =============================================================================
 # COLUMN DEFINITIONS
@@ -71,6 +74,7 @@ TARGET_COLUMN = "failed"
 
 # Datetime column
 DATETIME_COLUMN = "trigger_time"
+DATETIME_COLUMNS = ["trigger_time"]
 
 # Categorical columns (need encoding for ML)
 CATEGORICAL_COLUMNS = [
@@ -80,6 +84,20 @@ CATEGORICAL_COLUMNS = [
     "trigger_type",
     "failure_type",
     "error_message",
+]
+
+# NEW: High cardinality categorical columns (many unique values - use frequency encoding)
+HIGH_CARDINALITY_COLUMNS = [
+    "pipeline_name",
+    "repo",
+    "head_branch",
+    "error_message",
+]
+
+# NEW: Low cardinality categorical columns (few unique values - use label encoding)
+LOW_CARDINALITY_COLUMNS = [
+    "trigger_type",
+    "failure_type",
 ]
 
 # Numerical columns (continuous + discrete)
@@ -112,6 +130,21 @@ BINARY_COLUMNS = [
     "prev_run_status",
 ]
 
+# NEW: Columns to apply outlier capping (IQR method)
+OUTLIER_CAP_COLUMNS = [
+    "duration_seconds",
+    "avg_duration_7_runs",
+    "duration_deviation",
+    "hours_since_last_run",
+    "total_jobs",
+    "failed_jobs",
+    "retry_count",
+    "concurrent_runs",
+]
+
+# NEW: IQR multiplier for outlier detection
+OUTLIER_IQR_MULTIPLIER = 1.5
+
 # All feature columns (excluding ID, target, datetime)
 FEATURE_COLUMNS = CATEGORICAL_COLUMNS + NUMERICAL_COLUMNS
 
@@ -119,7 +152,7 @@ FEATURE_COLUMNS = CATEGORICAL_COLUMNS + NUMERICAL_COLUMNS
 ALL_COLUMNS = [ID_COLUMN, DATETIME_COLUMN] + FEATURE_COLUMNS + [TARGET_COLUMN]
 
 # =============================================================================
-# DATA VALIDATION RULES
+# DATA VALIDATION RULES (Updated for Member 3's preprocessing)
 # =============================================================================
 
 VALIDATION_RULES = {
@@ -130,7 +163,7 @@ VALIDATION_RULES = {
     # Missing value thresholds (percentage)
     "max_missing_percent": 5.0,
     
-    # Column-specific rules
+    # Column-specific rules (UPDATED)
     "column_rules": {
         "run_id": {
             "dtype": "int64",
@@ -174,9 +207,27 @@ VALIDATION_RULES = {
             "allowed_values": [0, 1],
             "nullable": False,
         },
+        # UPDATED: prev_run_status uses allowed_values instead of min/max
+        "prev_run_status": {
+            "dtype": "int64",
+            "allowed_values": [0, 1],
+            "nullable": False,
+        },
+        # UPDATED: duration_seconds has no upper cap
         "duration_seconds": {
             "dtype": "float64",
             "min_value": 0,
+            # No max_value - will be handled by IQR outlier capping
+            "nullable": False,
+        },
+        "avg_duration_7_runs": {
+            "dtype": "float64",
+            "min_value": 0,
+            "nullable": False,
+        },
+        "duration_deviation": {
+            "dtype": "float64",
+            # Can be negative (faster than average)
             "nullable": False,
         },
         "workflow_failure_rate": {
@@ -189,6 +240,13 @@ VALIDATION_RULES = {
             "dtype": "float64",
             "min_value": 0,
             "max_value": 7,
+            "nullable": False,
+        },
+        # UPDATED: hours_since_last_run clips at 0 (no negative values)
+        "hours_since_last_run": {
+            "dtype": "float64",
+            "min_value": 0,
+            # No max_value - will be handled by IQR outlier capping
             "nullable": False,
         },
         "total_jobs": {
@@ -206,10 +264,20 @@ VALIDATION_RULES = {
             "min_value": 0,
             "nullable": False,
         },
+        # UPDATED: concurrent_runs has no upper cap
         "concurrent_runs": {
             "dtype": "int64",
             "min_value": 0,
+            # No max_value - will be handled by IQR outlier capping
             "nullable": False,
+        },
+    },
+    
+    # Cross-column validation rules
+    "cross_column_rules": {
+        "failed_jobs_lte_total_jobs": {
+            "description": "failed_jobs must be <= total_jobs",
+            "check": "failed_jobs <= total_jobs",
         },
     },
 }
@@ -223,22 +291,13 @@ ANOMALY_SETTINGS = {
     "zscore_threshold": 3.0,
     
     # IQR multiplier for outlier detection
-    "iqr_multiplier": 1.5,
+    "iqr_multiplier": OUTLIER_IQR_MULTIPLIER,
     
     # Minimum percentage of anomalies to flag dataset
     "anomaly_flag_threshold": 5.0,
     
     # Columns to check for anomalies
-    "columns_to_check": [
-        "duration_seconds",
-        "avg_duration_7_runs",
-        "duration_deviation",
-        "hours_since_last_run",
-        "total_jobs",
-        "failed_jobs",
-        "retry_count",
-        "concurrent_runs",
-    ],
+    "columns_to_check": OUTLIER_CAP_COLUMNS,
 }
 
 # =============================================================================
@@ -263,6 +322,34 @@ BIAS_SETTINGS = {
     
     # Target column for bias analysis
     "target_column": TARGET_COLUMN,
+}
+
+# =============================================================================
+# PREPROCESSING SETTINGS (NEW - for Member 3)
+# =============================================================================
+
+PREPROCESSING_SETTINGS = {
+    # Missing value strategies
+    "missing_value_strategy": {
+        "numerical": "median",
+        "categorical": "mode",
+        "binary": "mode",
+    },
+    
+    # Encoding strategies
+    "encoding_strategy": {
+        "high_cardinality": "frequency",  # Frequency encoding
+        "low_cardinality": "label",       # Label encoding
+    },
+    
+    # Datetime parsing
+    "datetime_format": "%Y-%m-%d %H:%M:%S",
+    "normalize_datetime_separator": True,  # Replace "T" with " " before parsing
+    
+    # Outlier handling
+    "outlier_method": "iqr",
+    "outlier_iqr_multiplier": OUTLIER_IQR_MULTIPLIER,
+    "outlier_cap_columns": OUTLIER_CAP_COLUMNS,
 }
 
 # =============================================================================
@@ -298,8 +385,8 @@ DVC_CONFIG = {
     "remote_name": "gcs_remote",
     "remote_url": "gs://pipeline-autopilot-data",  # Update with your GCS bucket
     "tracked_files": [
-        str(RAW_DATASET_PATH),
-        str(PROCESSED_DATASET_PATH),
+        str(RAW_DATA_FILE),
+        str(PROCESSED_DATA_FILE),
         str(TRAIN_DATASET_PATH),
         str(TEST_DATASET_PATH),
     ],
@@ -345,11 +432,15 @@ def print_config():
     print("PIPELINE AUTOPILOT CONFIGURATION")
     print("=" * 60)
     print(f"Base Directory: {BASE_DIR}")
-    print(f"Raw Data Path: {RAW_DATASET_PATH}")
-    print(f"Processed Data Path: {PROCESSED_DATASET_PATH}")
+    print(f"Raw Data Path: {RAW_DATA_FILE}")
+    print(f"Processed Data Path: {PROCESSED_DATA_FILE}")
     print(f"Number of Features: {len(FEATURE_COLUMNS)}")
     print(f"Categorical Columns: {len(CATEGORICAL_COLUMNS)}")
+    print(f"  - High Cardinality: {len(HIGH_CARDINALITY_COLUMNS)}")
+    print(f"  - Low Cardinality: {len(LOW_CARDINALITY_COLUMNS)}")
     print(f"Numerical Columns: {len(NUMERICAL_COLUMNS)}")
+    print(f"Binary Columns: {len(BINARY_COLUMNS)}")
+    print(f"Outlier Cap Columns: {len(OUTLIER_CAP_COLUMNS)}")
     print(f"Target Column: {TARGET_COLUMN}")
     print("=" * 60)
 
@@ -367,7 +458,13 @@ if __name__ == "__main__":
     print("\n✅ All directories verified/created!")
     
     # Check if raw data exists
-    if RAW_DATASET_PATH.exists():
-        print(f"✅ Raw dataset found: {RAW_DATASET_PATH}")
+    if RAW_DATA_FILE.exists():
+        print(f"✅ Raw dataset found: {RAW_DATA_FILE}")
     else:
-        print(f"❌ Raw dataset NOT found: {RAW_DATASET_PATH}")
+        print(f"❌ Raw dataset NOT found: {RAW_DATA_FILE}")
+    
+    # Check if processed data exists
+    if PROCESSED_DATA_FILE.exists():
+        print(f"✅ Processed dataset found: {PROCESSED_DATA_FILE}")
+    else:
+        print(f"⏳ Processed dataset not yet created: {PROCESSED_DATA_FILE}")
