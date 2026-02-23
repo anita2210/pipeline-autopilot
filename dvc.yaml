@@ -1,0 +1,91 @@
+################################################################################
+# dvc.yaml
+# Pipeline Autopilot - DVC Pipeline Stage Definitions
+# Mirrors the Airflow DAG: data_acquisition -> preprocessing -> schema_validation
+#                          -> anomaly_detection -> bias_detection -> dvc_versioning
+#
+# Author : Member 2 (Data Engineer)
+# Date   : February 2026
+################################################################################
+
+stages:
+
+  # Stage 1: Data Acquisition
+  data_acquisition:
+    cmd: python scripts/data_acquisition.py --source csv
+    deps:
+      - scripts/data_acquisition.py
+      - scripts/config.py
+    outs:
+      - data/raw/final_dataset.csv:
+          desc: "Raw CI/CD pipeline log data (150K rows, 26 columns)"
+          cache: true
+
+  # Stage 2: Data Preprocessing
+  data_preprocessing:
+    cmd: python scripts/data_preprocessing.py
+    deps:
+      - scripts/data_preprocessing.py
+      - scripts/config.py
+      - data/raw/final_dataset.csv
+    outs:
+      - data/processed/processed_dataset.csv:
+          desc: "Cleaned and feature-engineered dataset"
+          cache: true
+      - data/processed/train_dataset.csv:
+          desc: "Training split (80%)"
+          cache: true
+      - data/processed/test_dataset.csv:
+          desc: "Test split (20%)"
+          cache: true
+
+  # Stage 3: Schema Validation
+  schema_validation:
+    cmd: python scripts/schema_validation.py
+    deps:
+      - scripts/schema_validation.py
+      - scripts/config.py
+      - data/processed/processed_dataset.csv
+    outs:
+      - data/schema/data_schema.json:
+          desc: "Inferred data schema for the processed dataset"
+          cache: true
+      - data/schema/validation_report.json:
+          desc: "Schema validation results"
+          cache: true
+
+  # Stage 4: Anomaly Detection
+  anomaly_detection:
+    cmd: python scripts/anomaly_detection.py
+    deps:
+      - scripts/anomaly_detection.py
+      - scripts/config.py
+      - data/processed/processed_dataset.csv
+    outs:
+      - data/reports/anomaly_report.json:
+          desc: "Anomaly detection results (Z-score + IQR)"
+          cache: true
+
+  # Stage 5: Bias Detection
+  bias_detection:
+    cmd: python scripts/bias_detection.py
+    deps:
+      - scripts/bias_detection.py
+      - scripts/config.py
+      - data/processed/processed_dataset.csv
+    outs:
+      - data/reports/bias_report.json:
+          desc: "Bias detection results across sensitive columns"
+          cache: true
+
+  # Stage 6: DVC Versioning
+  dvc_versioning:
+    cmd: python scripts/dvc_versioning.py --no-push
+    deps:
+      - scripts/dvc_versioning.py
+      - scripts/config.py
+      - data/raw/final_dataset.csv
+      - data/processed/processed_dataset.csv
+    plots:
+      - data/reports/pipeline_report.json:
+          desc: "Final pipeline execution summary"

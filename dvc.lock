@@ -1,0 +1,18 @@
+schema: '2.0'
+stages:
+  data_acquisition:
+    cmd: python scripts/data_acquisition.py --source csv
+    deps:
+    - path: scripts/config.py
+      hash: md5
+      md5: a498510fe93e42dfb83ca1c999406494
+      size: 10480
+    - path: scripts/data_acquisition.py
+      hash: md5
+      md5: cebb9e718d3f55dc7881c7042608647e
+      size: 8602
+    outs:
+    - path: data/raw/final_dataset.csv
+      hash: md5
+      md5: 0c737a0bfbefa927607b6fe7bd0d3f75
+      size: 53304939
