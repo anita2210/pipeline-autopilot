@@ -497,8 +497,10 @@ We use **data slicing** to analyze model performance across different subgroups.
 | Member 6 | Test Engineer | Unit tests, logging configuration |
 
 ---
+<img width="2876" height="1588" alt="image" src="https://github.com/user-attachments/assets/c2e1601c-8960-4a5c-99bb-3c3cc18af295" />
 
-## 📞 Troubleshooting
+
+##  Troubleshooting
 
 ### Common Issues
 
