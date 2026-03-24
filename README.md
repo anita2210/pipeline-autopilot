@@ -5,6 +5,9 @@
 [![Python 3.10](https://img.shields.io/badge/python-3.10-blue.svg)](https://www.python.org/downloads/)
 [![Airflow 2.8.1](https://img.shields.io/badge/airflow-2.8.1-green.svg)](https://airflow.apache.org/)
 [![Docker](https://img.shields.io/badge/docker-enabled-blue.svg)](https://www.docker.com/)
+[![MLflow](https://img.shields.io/badge/MLflow-experiment%20tracking-orange.svg)](https://mlflow.org/)
+[![XGBoost](https://img.shields.io/badge/XGBoost-model-brightgreen.svg)](https://xgboost.readthedocs.io/)
+[![Fairlearn](https://img.shields.io/badge/Fairlearn-bias%20detection-purple.svg)](https://fairlearn.org/)
 
 ---
 
@@ -12,14 +15,21 @@
 
 1. [Project Overview](#-project-overview)
 2. [How to Replicate](#-how-to-replicate-step-by-step-setup)
-3. [How to Run the Pipeline](#-how-to-run-the-pipeline)
-4. [How to Run Tests](#-how-to-run-tests)
-5. [Project Structure](#-project-structure)
-6. [Pipeline Architecture](#-pipeline-architecture)
-7. [Dataset Information](#-dataset-information)
-8. [Data Versioning with DVC](#-data-versioning-with-dvc)
-9. [Bias Detection & Mitigation](#-bias-detection--mitigation)
-10. [Team Members](#-team-members)
+3. [How to Run the Data Pipeline](#-how-to-run-the-data-pipeline)
+4. [How to Run the Model Pipeline](#-how-to-run-the-model-pipeline)
+5. [How to Run Tests](#-how-to-run-tests)
+6. [Project Structure](#-project-structure)
+7. [Pipeline Architecture](#-pipeline-architecture)
+8. [Dataset Information](#-dataset-information)
+9. [Model Development](#-model-development)
+10. [Experiment Tracking with MLflow](#-experiment-tracking-with-mlflow)
+11. [Model Validation](#-model-validation)
+12. [Model Bias Detection (Fairlearn)](#-model-bias-detection-fairlearn)
+13. [Sensitivity Analysis (SHAP)](#-sensitivity-analysis-shap)
+14. [CI/CD Pipeline Automation](#-cicd-pipeline-automation)
+15. [Model Registry & Deployment](#-model-registry--deployment)
+16. [Data Versioning with DVC](#-data-versioning-with-dvc)
+17. [Team Members](#-team-members)
 
 ---
 
@@ -42,11 +52,17 @@
 - ✅ Automated data acquisition and preprocessing
 - ✅ Schema validation and statistics generation
 - ✅ Anomaly detection with alerts
-- ✅ Bias detection using data slicing
+- ✅ Data-level and model-level bias detection
 - ✅ Data versioning with DVC
 - ✅ Full pipeline orchestration with Apache Airflow
-- ✅ Comprehensive logging and error handling
-- ✅ Unit tests for all components
+- ✅ ML model training with XGBoost + hyperparameter tuning
+- ✅ Experiment tracking with MLflow
+- ✅ Model validation with threshold analysis and rollback
+- ✅ Model-level bias detection with Fairlearn
+- ✅ Sensitivity analysis with SHAP
+- ✅ CI/CD automation with GitHub Actions
+- ✅ Model registry push to GCP Artifact Registry
+- ✅ Comprehensive logging, error handling, and unit tests
 
 ---
 
@@ -115,7 +131,7 @@ PIPELINE AUTOPILOT CONFIGURATION
 
 ---
 
-## ▶️ How to Run the Pipeline
+## ▶️ How to Run the Data Pipeline
 
 ### Step 1: Start Docker Desktop
 
@@ -154,7 +170,7 @@ pipeline_autopilot_webserver   Up (healthy)
    - **Username:** `admin`
    - **Password:** `admin`
 
-### Step 5: Run the DAG
+### Step 5: Run the Data DAG
 
 1. Find DAG: `pipeline_autopilot_data_pipeline`
 2. Enable the DAG (toggle switch ON)
@@ -183,38 +199,100 @@ docker-compose down
 
 ---
 
+## 🤖 How to Run the Model Pipeline
+
+### Option 1: Run via Airflow (Model DAG)
+
+1. Start Airflow (same steps as above)
+2. Find DAG: `pipeline_autopilot_model_pipeline`
+3. Enable and trigger the DAG
+4. Monitor the model pipeline tasks:
+
+```
+load_processed_data          ✅
+train_models                 ✅
+select_best_model            ✅
+validate_model               ✅
+model_bias_detection         ✅ (parallel)
+sensitivity_analysis         ✅ (parallel)
+validation_gate              ✅
+push_to_registry             ✅
+model_pipeline_complete      ✅
+```
+
+### Option 2: Run Scripts Individually
+
+```bash
+# Step 1: Train models (Logistic Regression, Random Forest, XGBoost)
+python scripts/model_training.py
+
+# Step 2: Track experiments with MLflow
+python scripts/experiment_tracking.py
+
+# Step 3: Validate the best model on hold-out set
+python scripts/model_validation.py
+
+# Step 4: Run model-level bias detection with Fairlearn
+python scripts/model_bias_detection.py
+
+# Step 5: Run SHAP sensitivity analysis
+python scripts/model_sensitivity.py
+
+# Step 6: Push validated model to registry
+python scripts/model_registry.py
+```
+
+### Option 3: Run via Docker
+
+```bash
+# Build the model training container
+docker build -f Dockerfile.model -t pipeline-autopilot-model .
+
+# Run model training
+docker run pipeline-autopilot-model
+```
+
+### View MLflow Experiment Results
+
+```bash
+# Start MLflow UI
+mlflow ui --port 5000
+
+# Open browser: http://localhost:5000
+```
+
+---
+
 ## 🧪 How to Run Tests
 
 ### Run All Tests
 
 ```bash
-# Make sure you're in the project directory
 cd pipeline-autopilot
 
-# Activate virtual environment (if using)
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
+# Activate virtual environment
+source venv/bin/activate  # Mac/Linux
+venv\Scripts\activate     # Windows
 
 # Run all tests
 pytest tests/ -v
 ```
 
-### Run Specific Test Files
+### Run Data Pipeline Tests
 
 ```bash
-# Test data preprocessing
 pytest tests/test_data_preprocessing.py -v
-
-# Test schema validation
 pytest tests/test_schema_validation.py -v
-
-# Test anomaly detection
 pytest tests/test_anomaly_detection.py -v
-
-# Test logging configuration
 pytest tests/test_logging_config.py -v
+```
+
+### Run Model Pipeline Tests
+
+```bash
+pytest tests/test_model_training.py -v
+pytest tests/test_model_validation.py -v
+pytest tests/test_model_bias.py -v
 ```
 
 ### Run Tests with Coverage Report
@@ -230,6 +308,9 @@ tests/test_data_preprocessing.py::test_load_data PASSED
 tests/test_data_preprocessing.py::test_handle_missing_values PASSED
 tests/test_schema_validation.py::test_validate_schema PASSED
 tests/test_anomaly_detection.py::test_detect_anomalies PASSED
+tests/test_model_training.py::test_train_model PASSED
+tests/test_model_validation.py::test_validate_model PASSED
+tests/test_model_bias.py::test_bias_detection PASSED
 ...
 ================= X passed in Y.YYs =================
 ```
@@ -242,7 +323,8 @@ tests/test_anomaly_detection.py::test_detect_anomalies PASSED
 pipeline-autopilot/
 │
 ├── dags/
-│   └── pipeline_dag.py              # Main Airflow DAG (7 tasks)
+│   ├── pipeline_dag.py              # Data pipeline Airflow DAG (7 tasks)
+│   └── model_dag.py                 # Model pipeline Airflow DAG (9 tasks)
 │
 ├── scripts/
 │   ├── config.py                    # Central configuration
@@ -250,9 +332,28 @@ pipeline-autopilot/
 │   ├── data_preprocessing.py        # Data cleaning & transformation
 │   ├── schema_validation.py         # Schema & statistics generation
 │   ├── anomaly_detection.py         # Outlier detection & alerts
-│   ├── bias_detection.py            # Bias analysis using data slicing
+│   ├── bias_detection.py            # Data-level bias analysis
 │   ├── dvc_versioning.py            # Data version control
-│   └── logging_config.py            # Logging configuration
+│   ├── logging_config.py            # Logging configuration
+│   ├── model_training.py            # Model training & selection (NEW)
+│   ├── experiment_tracking.py       # MLflow experiment tracking (NEW)
+│   ├── model_validation.py          # Hold-out validation & threshold analysis (NEW)
+│   ├── model_bias_detection.py      # Model-level bias with Fairlearn (NEW)
+│   ├── model_sensitivity.py         # SHAP feature importance (NEW)
+│   └── model_registry.py            # GCP Artifact Registry push (NEW)
+│
+├── models/                          # Model artifacts (NEW)
+│   ├── trained/                     # Saved model files (.joblib)
+│   │   ├── best_model.joblib
+│   │   ├── previous_model.joblib
+│   │   └── previous_metrics.json
+│   ├── registry/                    # Registry metadata & bias reports
+│   │   ├── registry_manifest.json
+│   │   └── model_bias_report.json
+│   └── sensitivity/                 # SHAP & feature importance outputs
+│       ├── hyperparameter_sensitivity/
+│       ├── auc_comparison.png
+│       └── feature_importance_comparison.png
 │
 ├── data/
 │   ├── raw/                         # Raw dataset
@@ -265,15 +366,24 @@ pipeline-autopilot/
 │   ├── test_data_preprocessing.py   # Preprocessing tests
 │   ├── test_schema_validation.py    # Schema validation tests
 │   ├── test_anomaly_detection.py    # Anomaly detection tests
-│   └── test_logging_config.py       # Logging tests
+│   ├── test_logging_config.py       # Logging tests
+│   ├── test_model_training.py       # Model training tests (NEW)
+│   ├── test_model_validation.py     # Model validation tests (NEW)
+│   └── test_model_bias.py           # Model bias tests (NEW)
+│
+├── .github/
+│   └── workflows/
+│       └── ml_pipeline.yml          # CI/CD with GitHub Actions (NEW)
 │
 ├── logs/                            # Airflow logs
+├── mlruns/                          # MLflow experiment logs (gitignored)
 │
 ├── .dvc/                            # DVC configuration
 ├── dvc.yaml                         # DVC pipeline definition
 ├── dvc.lock                         # DVC lock file
 │
 ├── docker-compose.yaml              # Airflow Docker setup
+├── Dockerfile.model                 # Docker for model training (NEW)
 ├── requirements.txt                 # Python dependencies
 ├── .gitignore                       # Git ignore rules
 ├── .env                             # Environment variables
@@ -284,7 +394,7 @@ pipeline-autopilot/
 
 ## 🔄 Pipeline Architecture
 
-### DAG Flow Diagram
+### Data Pipeline DAG
 
 ```
 ┌──────────────────┐
@@ -322,7 +432,55 @@ pipeline-autopilot/
    └─────────────────┘
 ```
 
-### Pipeline Execution Screenshots
+### Model Pipeline DAG
+
+```
+┌──────────────────────┐
+│  load_processed_data │
+└──────────┬───────────┘
+           │
+           ▼
+┌──────────────────────────────────────────────────┐
+│  train_models (Logistic Reg, RF, XGBoost + tuning)│
+└──────────┬───────────────────────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────┐
+│  select_best_model (AUC-ROC)    │
+└──────────┬───────────────────────┘
+           │
+           ▼
+┌──────────────────────────────────────────┐
+│  validate_model (hold-out, threshold)    │
+└──────────┬───────────────────────────────┘
+           │
+      ┌────┴────┐
+      │         │
+      ▼         ▼
+┌───────────┐ ┌─────────────┐
+│model_bias │ │ sensitivity │  ← PARALLEL EXECUTION
+│detection  │ │  analysis   │
+└─────┬─────┘ └──────┬──────┘
+      │              │
+      └──────┬───────┘
+             │
+             ▼
+   ┌───────────────────────────────────────────┐
+   │  validation_gate (AUC > 0.85? No bias?)   │
+   └──────────┬────────────────────────────────┘
+              │
+              ▼
+   ┌──────────────────────────────────┐
+   │  push_to_registry (GCP Artifact) │
+   └──────────┬───────────────────────┘
+              │
+              ▼
+   ┌───────────────────────┐
+   │ model_pipeline_complete│
+   └───────────────────────┘
+```
+
+### Data Pipeline Execution Screenshots
 
 #### Pipeline Status & Task History
 All 7 tasks completed successfully with multiple successful runs:
@@ -339,17 +497,15 @@ Visualizes task duration and parallel execution:
 
 ![Pipeline Gantt](images/pipeline_gantt.png)
 
-### Task Details
+### Model Pipeline Execution Screenshots
 
-| Task | Description | Duration |
-|------|-------------|----------|
-| `data_acquisition` | Load raw CSV, validate columns | ~5 sec |
-| `data_preprocessing` | Clean, transform, encode | ~5-13 min |
-| `schema_validation` | Generate schema & statistics | ~5 sec |
-| `bias_detection` | Analyze bias across features | ~5 sec |
-| `anomaly_detection` | Detect outliers using Z-score/IQR | ~7 sec |
-| `dvc_versioning` | Version control processed data | ~3 sec |
-| `pipeline_complete` | Generate summary report | ~2 sec |
+#### Model DAG - Graph View
+<!-- 📸 SCREENSHOT NEEDED: Airflow Graph view of model_dag showing all tasks green -->
+![Model Pipeline Graph](images/model_pipeline_graph.png)
+
+#### Model DAG - Task History
+<!-- 📸 SCREENSHOT NEEDED: Airflow task history showing successful model pipeline runs -->
+![Model Pipeline Status](images/model_pipeline_status.png)
 
 ---
 
@@ -409,6 +565,276 @@ Raw Data                          Preprocessed Data
 
 ---
 
+## 🧠 Model Development
+
+### Approach
+
+We train and compare multiple ML models to predict CI/CD pipeline failures (`failed` = 1) using the preprocessed dataset (149,967 rows, 32 features).
+
+### Data Split
+
+| Set | Split | Purpose |
+|-----|-------|---------|
+| Train | 70% | Model training |
+| Validation | 15% | Hyperparameter tuning |
+| Test | 15% | Final hold-out evaluation |
+
+Stratified on `failed` to preserve the ~11.33% failure rate across all splits.
+
+### Models Trained
+
+| Model | Description | Class Imbalance Handling |
+|-------|-------------|--------------------------|
+| Logistic Regression | Linear baseline | `class_weight='balanced'` |
+| Random Forest | Ensemble baseline | `class_weight='balanced'` |
+| **XGBoost** | Gradient boosting (primary) | `scale_pos_weight` (~7.8x) |
+
+### Hyperparameter Tuning
+
+XGBoost hyperparameters were tuned using RandomizedSearchCV / Optuna:
+
+| Parameter | Search Space |
+|-----------|-------------|
+| `n_estimators` | 100 - 500 |
+| `max_depth` | 3 - 10 |
+| `learning_rate` | 0.01 - 0.3 |
+| `subsample` | 0.6 - 1.0 |
+| `colsample_bytree` | 0.6 - 1.0 |
+
+### Model Selection
+
+The best model is selected based on **AUC-ROC** on the validation set. The selected model is saved as `models/trained/best_model.joblib`.
+
+**Script:** `scripts/model_training.py`
+
+---
+
+## 📈 Experiment Tracking with MLflow
+
+All training runs are tracked using **MLflow** with experiment name `pipelineguard-model-dev`.
+
+### What is Logged
+
+| Category | Details |
+|----------|---------|
+| **Parameters** | All hyperparameters per model |
+| **Metrics** | AUC-ROC, F1, Precision, Recall, Accuracy |
+| **Artifacts** | Confusion matrices, comparison bar plots |
+| **Model Versions** | Best model registered in MLflow Model Registry (Staging → Production) |
+
+### MLflow UI
+
+```bash
+mlflow ui --port 5000
+# Open: http://localhost:5000
+```
+
+#### MLflow Experiment Dashboard
+<!-- 📸 SCREENSHOT NEEDED: MLflow UI showing experiment runs with metrics -->
+![MLflow Experiments](images/mlflow_experiments.png)
+
+#### Model Comparison - AUC Across Models
+<!-- 📸 SCREENSHOT NEEDED: Bar plot comparing AUC of Logistic Reg, RF, XGBoost -->
+![AUC Comparison](models/sensitivity/auc_comparison.png)
+
+**Script:** `scripts/experiment_tracking.py`
+
+---
+
+## ✅ Model Validation
+
+### Hold-Out Evaluation
+
+The best model is evaluated on the 15% test set that was never used during training or tuning.
+
+### Metrics Computed
+
+| Metric | Description |
+|--------|-------------|
+| Accuracy | Overall correct predictions |
+| Precision | Of predicted failures, how many were real |
+| Recall | Of real failures, how many were caught |
+| F1-Score | Harmonic mean of precision and recall |
+| AUC-ROC | Area under the ROC curve |
+| AUC-PR | Area under the Precision-Recall curve |
+
+### Threshold Analysis
+
+Decision thresholds are varied from 0.1 to 0.9 to find the optimal threshold for F1-score. This generates a threshold-vs-metric plot.
+
+<!-- 📸 SCREENSHOT NEEDED: Threshold vs F1/Precision/Recall plot -->
+![Threshold Analysis](images/threshold_analysis.png)
+
+### Confusion Matrix
+
+<!-- 📸 SCREENSHOT NEEDED: Confusion matrix heatmap for best model on test set -->
+![Confusion Matrix](images/confusion_matrix.png)
+
+### Validation Gate
+
+The model must pass the following checks before proceeding to registry:
+- AUC-ROC > 0.85
+- No critical bias flags
+- Performance >= previous model (rollback otherwise)
+
+### Rollback Mechanism
+
+If the newly trained model performs worse than the previous best model (compared by AUC), the system rejects the new model and keeps `previous_model.joblib` as the production model.
+
+**Script:** `scripts/model_validation.py`
+
+---
+
+## ⚖️ Model Bias Detection (Fairlearn)
+
+### Data-Level Bias (Assignment 1)
+
+We use **data slicing** to analyze failure rate distributions across subgroups.
+
+| Feature | Type | Slices |
+|---------|------|--------|
+| `repo` | Categorical | 50 repositories |
+| `pipeline_name` | Categorical | Multiple pipelines |
+| `trigger_type` | Categorical | push, pull_request, schedule, etc. |
+| `is_weekend` | Binary | Weekend vs Weekday |
+| `is_bot_triggered` | Binary | Bot vs Human |
+
+### Model-Level Bias (Assignment 2)
+
+We use **Fairlearn MetricFrame** to evaluate whether the trained model predicts fairly across different subgroups.
+
+### Slicing Features for Model Bias
+
+| Feature | Why |
+|---------|-----|
+| `trigger_type` | Model shouldn't favor push over schedule |
+| `is_bot_triggered` | Bot vs human runs should be treated fairly |
+| `is_main_branch` | Main branch shouldn't be over/under-flagged |
+| `is_weekend` | Weekend runs should get fair predictions |
+| `repo` (top 10) | No single repo should be unfairly flagged |
+
+### Metrics Tracked Per Slice
+
+- Accuracy, F1, FPR (False Positive Rate), FNR (False Negative Rate)
+
+### Disparity Metrics
+
+- Demographic Parity Difference
+- Equalized Odds Difference
+
+### Bias Mitigation
+
+If disparity exceeds 1.5x between any two groups:
+- **ThresholdOptimizer** (Fairlearn) adjusts decision thresholds per group
+- Or class re-weighting is applied
+
+### Bias Report
+
+Generated at: `models/registry/model_bias_report.json`
+
+<!-- 📸 SCREENSHOT NEEDED: Per-slice metric bar charts (e.g., F1 by trigger_type) -->
+![Bias Metrics by Slice](images/bias_per_slice.png)
+
+**Script:** `scripts/model_bias_detection.py`
+
+---
+
+## 🔍 Sensitivity Analysis (SHAP)
+
+### Feature Importance
+
+We use **SHAP (SHapley Additive exPlanations)** to explain which features drive the model's predictions.
+
+#### SHAP Summary Plot (Beeswarm)
+<!-- 📸 SCREENSHOT NEEDED: SHAP beeswarm summary plot -->
+![SHAP Summary](images/shap_summary.png)
+
+#### Feature Importance Comparison
+Compares SHAP-based importance vs XGBoost built-in `feature_importances_`:
+
+![Feature Importance Comparison](models/sensitivity/feature_importance_comparison.png)
+
+### Hyperparameter Sensitivity
+
+We vary the top 3 hyperparameters independently and plot AUC vs parameter value to show which hyperparameters have the most impact.
+
+<!-- 📸 SCREENSHOT NEEDED: Hyperparameter sensitivity plots -->
+![Hyperparameter Sensitivity](images/hyperparameter_sensitivity.png)
+
+**Script:** `scripts/model_sensitivity.py`
+
+---
+
+## 🔁 CI/CD Pipeline Automation
+
+### GitHub Actions Workflow
+
+The CI/CD pipeline is defined in `.github/workflows/ml_pipeline.yml` and triggers automatically on push to the `model-dev` branch.
+
+### Pipeline Steps
+
+```
+Push to model-dev branch
+        │
+        ▼
+  Install dependencies
+        │
+        ▼
+  Run model training
+        │
+        ▼
+  Run model validation
+        │
+        ▼
+  Run bias detection
+        │
+        ▼
+  Validation gate check
+   (AUC > 0.85? No bias?)
+        │
+   ┌────┴────┐
+   │         │
+  PASS      FAIL
+   │         │
+   ▼         ▼
+Push to    Block deploy
+registry   + notify
+```
+
+### Automated Checks
+- Model training completes successfully
+- Validation metrics exceed thresholds
+- Bias checks pass across all slices
+- If any check fails → pipeline fails, team is notified
+
+### GitHub Actions Run
+<!-- 📸 SCREENSHOT NEEDED: GitHub Actions showing successful workflow run -->
+![GitHub Actions](images/github_actions.png)
+
+**Config:** `.github/workflows/ml_pipeline.yml`
+
+---
+
+## 📦 Model Registry & Deployment
+
+### Model Registry
+
+Once the model passes validation and bias checks, it is pushed to **GCP Artifact Registry** (or GCS bucket as fallback).
+
+### Registry Metadata
+
+Each model version is tagged with:
+- Model version ID (timestamp-based)
+- AUC-ROC, F1, Precision, Recall
+- Bias check status (pass/fail)
+- Git commit hash
+
+Registry manifest: `models/registry/registry_manifest.json`
+
+**Script:** `scripts/model_registry.py`
+
+---
+
 ## 📦 Data Versioning with DVC
 
 ### Initialize DVC (already done)
@@ -448,59 +874,22 @@ dvc diff
 
 ---
 
-## ⚖️ Bias Detection & Mitigation
-
-### Approach
-
-We use **data slicing** to analyze model performance across different subgroups.
-
-### Features Analyzed for Bias
-
-| Feature | Type | Slices |
-|---------|------|--------|
-| `repo` | Categorical | 50 repositories |
-| `pipeline_name` | Categorical | Multiple pipelines |
-| `trigger_type` | Categorical | push, pull_request, schedule, etc. |
-| `is_weekend` | Binary | Weekend vs Weekday |
-| `is_bot_triggered` | Binary | Bot vs Human |
-
-### Bias Reports Generated
-
-- `data/reports/bias_repo.png`
-- `data/reports/bias_pipeline_name.png`
-- `data/reports/bias_trigger_type.png`
-- `data/reports/bias_is_weekend.png`
-- `data/reports/bias_is_bot_triggered.png`
-
-### Findings & Mitigation
-
-1. **Class Imbalance:** Target variable has ~11% failure rate
-   - Mitigation: Use stratified sampling, class weights in model training
-
-2. **Repository Bias:** Some repos have higher failure rates
-   - Mitigation: Include repo as a feature, monitor per-repo performance
-
-3. **Temporal Bias:** Weekend runs may behave differently
-   - Mitigation: Include is_weekend as a feature
-
----
-
 ## 👥 Team Members
 
-| Member | Role | Responsibilities |
-|--------|------|------------------|
-| Member 1 | Pipeline Architect | Folder structure, config.py, Airflow DAG, Docker setup |
-| Member 2 | Data Engineer | Data acquisition scripts |
-| Member 3 | Data Scientist | Data preprocessing, feature engineering |
-| Member 4 | Quality Engineer | Schema validation, anomaly detection |
-| Member 5 | MLOps Engineer | DVC versioning, bias detection |
-| Member 6 | Test Engineer | Unit tests, logging configuration |
+| Member | Role | Assignment 1 | Assignment 2 |
+|--------|------|-------------|-------------|
+| Member 1 | Pipeline Architect / ML Engineer | Folder structure, config.py, Airflow DAG, Docker setup | Model training & selection, Model DAG |
+| Member 2 | Data Engineer / MLOps Engineer | Data acquisition scripts | MLflow experiment tracking, model versioning |
+| Member 3 | Data Scientist | Data preprocessing, feature engineering | Model validation, threshold analysis |
+| Member 4 | Quality Engineer / Fairness Analyst | Schema validation, anomaly detection | Model-level bias detection (Fairlearn) |
+| Member 5 | MLOps Engineer | DVC versioning, bias detection | SHAP sensitivity analysis, GCP registry push |
+| Member 6 | Test Engineer / DevOps | Unit tests, logging configuration | CI/CD pipeline (GitHub Actions), Dockerfile, model tests |
 
 ---
+
 <img width="2876" height="1588" alt="image" src="https://github.com/user-attachments/assets/c2e1601c-8960-4a5c-99bb-3c3cc18af295" />
 
-
-##  Troubleshooting
+## Troubleshooting
 
 ### Common Issues
 
@@ -522,11 +911,21 @@ docker-compose up -d
 - Ensure virtual environment is activated
 - Install dependencies: `pip install -r requirements.txt`
 
+**5. MLflow UI not loading**
+- Make sure you ran at least one training experiment
+- Check: `ls mlruns/` should have experiment folders
+- Try: `mlflow ui --host 0.0.0.0 --port 5000`
+
+**6. Model pipeline failing at validation gate**
+- Check AUC threshold in config (default: 0.85)
+- Review bias report: `models/registry/model_bias_report.json`
+- If rollback triggered, check `models/trained/previous_metrics.json`
+
 ---
 
 ## 📄 License
 
-This project is for educational purposes (MLOps Course Project - February 2026).
+This project is for educational purposes (MLOps Course Project - March 2026).
 
 ---
 
@@ -534,6 +933,6 @@ This project is for educational purposes (MLOps Course Project - February 2026).
 
 - **GitHub Repository:** https://github.com/anita2210/pipeline-autopilot
 - **Airflow UI:** http://localhost:8080 (when running)
+- **MLflow UI:** http://localhost:5000 (when running)
 
 ---
-
