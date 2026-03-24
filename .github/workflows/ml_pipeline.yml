@@ -100,6 +100,12 @@ jobs:
             exit 1
           fi
       
+      - name: Push to GCP Artifact Registry
+        if: success()
+        run: |
+          echo "🚀 Pushing model to GCP Artifact Registry..."
+          python scripts/model_registry.py
+      
       - name: Upload model artifacts
         if: success()
         uses: actions/upload-artifact@v4
