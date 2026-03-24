@@ -12,8 +12,8 @@ import mlflow
 import xgboost
 
 # --- FIX: Set MLflow to use a local relative path to avoid "Aishwarya%20V" error ---
-os.makedirs('mlruns', exist_ok=True)
-mlflow.set_tracking_uri("file:///" + os.path.join(os.getcwd(), "mlruns").replace("\\", "/"))
+os.makedirs('/opt/airflow/mlruns', exist_ok=True)
+mlflow.set_tracking_uri("file:///" + "/opt/airflow/mlruns".replace("\\", "/"))
 
 # --- STEP 2: Load Assets & Reproduce Split ---
 def load_assets():
@@ -104,12 +104,12 @@ report = {
     'results': disparity_results
 }
 
-os.makedirs('models/registry', exist_ok=True)
+os.makedirs('/opt/airflow/models/registry', exist_ok=True)
 with open('models/registry/model_bias_report.json', 'w') as f:
     json.dump(report, f, indent=2, default=str)
 
 # STEP 8: Generate Visualizations
-os.makedirs('data/reports', exist_ok=True)
+os.makedirs('/opt/airflow/data/reports', exist_ok=True)
 for feature, mf in all_metrics_frames.items():
     mf.by_group.plot(kind='bar', figsize=(10, 5), title=f'Fairness: {feature}')
     plt.tight_layout()
