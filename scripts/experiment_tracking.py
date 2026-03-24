@@ -17,7 +17,7 @@ MLRUNS_DIR = BASE_DIR / "mlruns"
 MODELS_DIR = BASE_DIR / "models"
 
 EXPERIMENT_NAME = "pipelineguard-model-dev"
-TRACKING_URI    = f"file://{MLRUNS_DIR}"
+TRACKING_URI    = "file:///opt/airflow/mlruns"
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(message)s")
 logger = logging.getLogger(__name__)
