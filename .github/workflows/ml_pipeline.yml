@@ -1,4 +1,4 @@
-name: ML Pipeline - Train, Validate, Deploy
+name: ML Pipeline - Test Suite
 
 on:
   push:
@@ -38,27 +38,21 @@ jobs:
         if: success()
         run: echo "✅ All tests passed!"
 
-  
   notify:
     name: Send Notification
     runs-on: ubuntu-latest
-    needs: train-and-validate
+    needs: test
     if: always()
     
     steps:
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.11'
-
       - name: Notify success
-        if: needs.train-and-validate.result == 'success'
+        if: needs.test.result == 'success'
         run: |
-          echo "✅ Pipeline SUCCESS - Model validated and ready for deployment"
+          echo "✅ Pipeline SUCCESS - All tests passed!"
+          echo "Model scripts validated and ready for training"
       
       - name: Notify failure
-        if: needs.train-and-validate.result == 'failure'
+        if: needs.test.result == 'failure'
         run: |
-          echo "❌ Pipeline FAILED - Check validation or bias reports"
+          echo "❌ Pipeline FAILED - Check test results"
           exit 1
