@@ -1,0 +1,70 @@
+{
+  "timestamp": "2026-03-23T02:24:42.929277",
+  "overall_pass": false,
+  "results": {
+    "trigger_type": {
+      "ratio": {
+        "accuracy": 0.987012987012987,
+        "f1": 0.0,
+        "fpr": 0.0,
+        "fnr": 0.0
+      },
+      "flagged": true,
+      "flagged_metrics": [
+        "f1",
+        "fpr",
+        "fnr"
+      ]
+    },
+    "is_bot_triggered": {
+      "ratio": {
+        "accuracy": 0.9994340153959643,
+        "f1": 0.994793017765574,
+        "fpr": 0.883030801114843,
+        "fnr": 0.3676584234930448
+      },
+      "flagged": true,
+      "flagged_metrics": [
+        "fnr"
+      ]
+    },
+    "is_main_branch": {
+      "ratio": {
+        "accuracy": 0.9977729749021343,
+        "f1": 0.9899930395486549,
+        "fpr": 0.18253373313343327,
+        "fnr": 0.4623541887592789
+      },
+      "flagged": true,
+      "flagged_metrics": [
+        "fpr",
+        "fnr"
+      ]
+    },
+    "is_weekend": {
+      "ratio": {
+        "accuracy": 0.9996151118318866,
+        "f1": 0.9983618075827079,
+        "fpr": 0.9110490868272556,
+        "fnr": 0.6010820045558086
+      },
+      "flagged": true,
+      "flagged_metrics": [
+        "fnr"
+      ]
+    },
+    "repo": {
+      "ratio": {
+        "accuracy": 0.9720101781170484,
+        "f1": 0.9261744966442953,
+        "fpr": 0.0,
+        "fnr": 0.0
+      },
+      "flagged": true,
+      "flagged_metrics": [
+        "fpr",
+        "fnr"
+      ]
+    }
+  }
+}

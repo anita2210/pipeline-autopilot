@@ -1,0 +1,142 @@
+{
+  "status": "success",
+  "shap_plots": [
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\shap_summary.png",
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\shap_bar.png"
+  ],
+  "feature_importance": {
+    "comparison_plot": "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\feature_importance_comparison.png"
+  },
+  "hyperparameter_sensitivity": {
+    "max_depth": [
+      {
+        "param_value": 3,
+        "mean_auc": 0.9997404664448947,
+        "std_auc": 3.3665372177999496e-05
+      },
+      {
+        "param_value": 4,
+        "mean_auc": 0.9997434424069039,
+        "std_auc": 3.879049355869621e-05
+      },
+      {
+        "param_value": 5,
+        "mean_auc": 0.9997422393280414,
+        "std_auc": 4.600236582543451e-05
+      },
+      {
+        "param_value": 6,
+        "mean_auc": 0.9997637224297397,
+        "std_auc": 6.137693737965635e-05
+      },
+      {
+        "param_value": 7,
+        "mean_auc": 0.9997514786967957,
+        "std_auc": 6.112863174661451e-05
+      },
+      {
+        "param_value": 8,
+        "mean_auc": 0.9997589441565246,
+        "std_auc": 6.183065330613834e-05
+      },
+      {
+        "param_value": 9,
+        "mean_auc": 0.9997520742591671,
+        "std_auc": 6.268505803876169e-05
+      },
+      {
+        "param_value": 10,
+        "mean_auc": 0.9997520742591671,
+        "std_auc": 6.268505803876169e-05
+      }
+    ],
+    "learning_rate": [
+      {
+        "param_value": 0.01,
+        "mean_auc": 0.9987357181120453,
+        "std_auc": 0.0009785017335127918
+      },
+      {
+        "param_value": 0.02,
+        "mean_auc": 0.999717417334522,
+        "std_auc": 7.823094253305375e-05
+      },
+      {
+        "param_value": 0.05,
+        "mean_auc": 0.9997628380948184,
+        "std_auc": 5.121344844341819e-05
+      },
+      {
+        "param_value": 0.1,
+        "mean_auc": 0.9997637224297397,
+        "std_auc": 6.137693737965635e-05
+      },
+      {
+        "param_value": 0.15,
+        "mean_auc": 0.9997329371734481,
+        "std_auc": 8.534390999848789e-05
+      },
+      {
+        "param_value": 0.2,
+        "mean_auc": 0.9997279007345244,
+        "std_auc": 5.748486788286769e-05
+      },
+      {
+        "param_value": 0.3,
+        "mean_auc": 0.9997198001964286,
+        "std_auc": 8.488652656218813e-05
+      }
+    ],
+    "n_estimators": [
+      {
+        "param_value": 50,
+        "mean_auc": 0.9997514846233782,
+        "std_auc": 5.607370091326953e-05
+      },
+      {
+        "param_value": 100,
+        "mean_auc": 0.9997658125395669,
+        "std_auc": 6.101505392490294e-05
+      },
+      {
+        "param_value": 150,
+        "mean_auc": 0.9997640273667677,
+        "std_auc": 5.586577751527388e-05
+      },
+      {
+        "param_value": 200,
+        "mean_auc": 0.9997637224297397,
+        "std_auc": 6.137693737965635e-05
+      },
+      {
+        "param_value": 250,
+        "mean_auc": 0.9997613283597583,
+        "std_auc": 6.612345480176685e-05
+      },
+      {
+        "param_value": 300,
+        "mean_auc": 0.9997535569015077,
+        "std_auc": 7.279624713900154e-05
+      },
+      {
+        "param_value": 400,
+        "mean_auc": 0.9997517654992629,
+        "std_auc": 7.300652823600592e-05
+      },
+      {
+        "param_value": 500,
+        "mean_auc": 0.9997437019503582,
+        "std_auc": 7.487665367116717e-05
+      }
+    ]
+  },
+  "output_paths": [
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\shap_summary.png",
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\shap_bar.png",
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\feature_importance_comparison.png",
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\hyperparameter_sensitivity\\sensitivity_max_depth.png",
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\hyperparameter_sensitivity\\sensitivity_learning_rate.png",
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\hyperparameter_sensitivity\\sensitivity_n_estimators.png",
+    "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\sensitivity\\hyperparameter_sensitivity_combined.png"
+  ]
+}

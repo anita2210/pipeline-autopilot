@@ -1,0 +1,16 @@
+{
+  "model_name": "pipelineguard-failure-predictor",
+  "version": "v20260323-9d8f94df8f27de58",
+  "pushed_at": "2026-03-23T04:56:30.345513Z",
+  "metrics": {
+    "auc_roc": 0.999938,
+    "source": "recomputed"
+  },
+  "model_hash": "9d8f94df8f27de58",
+  "min_auc_gate": 0.85,
+  "push_info": {
+    "registry_type": "dry_run",
+    "model_uri": "[dry-run] pipelineguard-failure-predictor:v20260323-9d8f94df8f27de58"
+  },
+  "model_path_local": "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\best_model.joblib"
+}
