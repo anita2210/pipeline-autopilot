@@ -1,0 +1,136 @@
+name: ML Pipeline - Train, Validate, Deploy
+
+on:
+  push:
+    branches:
+      - model-dev
+      - member6-assignment2
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test:
+    name: Run Tests
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Run unit tests
+        run: |
+          pytest tests/test_model_training.py -v
+          pytest tests/test_model_validation.py -v
+          pytest tests/test_model_bias.py -v
+      
+      - name: Test results
+        if: success()
+        run: echo "✅ All tests passed!"
+
+  train-and-validate:
+    name: Train Model & Validate
+    runs-on: ubuntu-latest
+    needs: test
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+      
+      - name: Train models
+        run: |
+          python scripts/model_training.py
+      
+      - name: Validate model
+        id: validate
+        run: |
+          python scripts/model_validation.py
+      
+      - name: Check validation gate
+        run: |
+          if [ -f "models/registry/validation_report.json" ]; then
+            PASSED=$(python -c "import json; print(json.load(open('models/registry/validation_report.json'))['validation_gate']['passed'])")
+            if [ "$PASSED" = "True" ]; then
+              echo "✅ Validation gate PASSED"
+            else
+              echo "❌ Validation gate FAILED"
+              exit 1
+            fi
+          else
+            echo "⚠️ Validation report not found"
+            exit 1
+          fi
+      
+      - name: Check bias
+        run: |
+          python scripts/model_bias_detection.py
+      
+      - name: Verify bias report
+        run: |
+          if [ -f "models/registry/model_bias_report.json" ]; then
+            BIAS_PASSED=$(python -c "import json; print(json.load(open('models/registry/model_bias_report.json'))['overall_pass'])")
+            if [ "$BIAS_PASSED" = "True" ]; then
+              echo "✅ Bias check PASSED"
+            else
+              echo "❌ Bias detected - deployment blocked"
+              exit 1
+            fi
+          else
+            echo "⚠️ Bias report not found"
+            exit 1
+          fi
+      
+      - name: Upload model artifacts
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: trained-model
+          path: |
+            models/trained/*.joblib
+            models/registry/*.json
+      
+      - name: Deployment approved
+        if: success()
+        run: |
+          echo "🚀 All checks passed!"
+          echo "✅ AUC threshold met"
+          echo "✅ No bias detected"
+          echo "✅ Model ready for registry push"
+
+  notify:
+    name: Send Notification
+    runs-on: ubuntu-latest
+    needs: train-and-validate
+    if: always()
+    
+    steps:
+      - name: Notify success
+        if: needs.train-and-validate.result == 'success'
+        run: |
+          echo "✅ Pipeline SUCCESS - Model validated and ready for deployment"
+      
+      - name: Notify failure
+        if: needs.train-and-validate.result == 'failure'
+        run: |
+          echo "❌ Pipeline FAILED - Check validation or bias reports"
+          exit 1
