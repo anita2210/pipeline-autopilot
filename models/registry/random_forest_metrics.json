@@ -1,0 +1,15 @@
+{
+  "run_id": "327fdd37f83a47c7863fbeaa2c791614",
+  "run_name": "random_forest",
+  "auc_roc": 0.999854,
+  "auc_pr": 0.998874,
+  "f1": 0.983683,
+  "precision": 0.974596,
+  "recall": 0.992941,
+  "accuracy": 0.996267,
+  "model": "random_forest",
+  "n_estimators": 200,
+  "max_depth": 15,
+  "min_samples_leaf": 5,
+  "class_weight": "balanced"
+}

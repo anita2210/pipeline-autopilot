@@ -1,0 +1,28 @@
+# Dockerfile for Pipeline Autopilot Model Training
+FROM python:3.13-slim
+
+WORKDIR /app
+
+# Install system dependencies for XGBoost
+RUN apt-get update && apt-get install -y \
+    gcc \
+    g++ \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy requirements and install
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy project files
+COPY scripts/ ./scripts/
+COPY data/ ./data/
+COPY models/ ./models/
+
+# Create directories
+RUN mkdir -p logs mlruns models/trained models/registry
+
+# Set Python path
+ENV PYTHONPATH=/app
+
+# Run model training by default
+CMD ["python", "scripts/model_training.py"]

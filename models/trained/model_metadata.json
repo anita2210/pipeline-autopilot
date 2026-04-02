@@ -1,0 +1,36 @@
+{
+  "best_model_name": "xgboost_default",
+  "model_path": "/opt/airflow/models/trained/best_model.joblib",
+  "trained_at": "2026-03-24T23:03:38.549134",
+  "val_metrics": {
+    "auc_roc": 0.999919,
+    "auc_pr": 0.999373,
+    "f1": 0.98751,
+    "precision": 0.982906,
+    "recall": 0.992157,
+    "accuracy": 0.997156
+  },
+  "test_metrics": {
+    "auc_roc": 0.999892,
+    "auc_pr": 0.999151,
+    "f1": 0.982886,
+    "precision": 0.974923,
+    "recall": 0.99098,
+    "accuracy": 0.996089
+  },
+  "best_params": {
+    "model": "xgboost_default",
+    "n_estimators": 300,
+    "max_depth": 6,
+    "learning_rate": 0.1,
+    "subsample": 0.8,
+    "colsample_bytree": 0.8,
+    "scale_pos_weight": 7.824
+  },
+  "validation_auc_all": {
+    "logistic_regression": 0.99833,
+    "random_forest": 0.999854,
+    "xgboost_default": 0.999919,
+    "xgboost_tuned": 0.999913
+  }
+}

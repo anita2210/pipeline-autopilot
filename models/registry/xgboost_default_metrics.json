@@ -1,0 +1,17 @@
+{
+  "run_id": "2496db80a9014b3886a4cedbe909c17e",
+  "run_name": "xgboost_default",
+  "auc_roc": 0.999919,
+  "auc_pr": 0.999373,
+  "f1": 0.98751,
+  "precision": 0.982906,
+  "recall": 0.992157,
+  "accuracy": 0.997156,
+  "model": "xgboost_default",
+  "n_estimators": 300,
+  "max_depth": 6,
+  "learning_rate": 0.1,
+  "subsample": 0.8,
+  "colsample_bytree": 0.8,
+  "scale_pos_weight": 7.824
+}

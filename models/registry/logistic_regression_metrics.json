@@ -1,0 +1,15 @@
+{
+  "run_id": "0ec9695fd3954040ba43da7e27df820d",
+  "run_name": "logistic_regression",
+  "auc_roc": 0.99833,
+  "auc_pr": 0.973057,
+  "f1": 0.965926,
+  "precision": 0.94353,
+  "recall": 0.989412,
+  "accuracy": 0.992089,
+  "model": "logistic_regression",
+  "C": 0.1,
+  "max_iter": 1000,
+  "class_weight": "balanced",
+  "solver": "lbfgs"
+}
