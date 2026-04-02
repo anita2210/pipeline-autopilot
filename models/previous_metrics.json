@@ -1,10 +1,11 @@
 {
-  "accuracy": 0.997,
-  "precision": 0.9784,
-  "recall": 0.9953,
-  "f1_score": 0.9868,
-  "auc_roc": 0.9999,
-  "auc_pr": 0.9995,
+  "model": "MLP Neural Network",
+  "accuracy": 0.996,
+  "precision": 0.9805,
+  "recall": 0.9843,
+  "f1_score": 0.9824,
+  "auc_roc": 0.9998,
+  "auc_pr": 0.9987,
   "test_size": 22500,
   "n_failures": 2550
 }

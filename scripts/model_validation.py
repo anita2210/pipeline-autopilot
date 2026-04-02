@@ -1,7 +1,7 @@
 """
 model_validation.py
 -------------------
-Validates the XGBoost pipeline failure prediction model.
+Validates the MLP (Neural Network) pipeline failure prediction model.
 
 Tasks:
 1. Hold-out evaluation  — accuracy, precision, recall, F1, AUC-ROC, AUC-PR
@@ -36,10 +36,10 @@ from sklearn.metrics import (
     precision_score,
     recall_score,
     roc_auc_score,
-    roc_curve,
 )
 from sklearn.model_selection import train_test_split
-from xgboost import XGBClassifier
+from sklearn.neural_network import MLPClassifier
+from sklearn.preprocessing import StandardScaler
 
 warnings.filterwarnings("ignore")
 
@@ -67,20 +67,20 @@ logger = logging.getLogger("model_validation")
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
-PROCESSED_DATASET  = PROCESSED_DATA_DIR / "processed_dataset.csv"
-MODEL_DIR          = Path(__file__).resolve().parents[1] / "models"
-MODEL_PATH         = MODEL_DIR / "best_model.joblib"
-PREV_MODEL_PATH    = MODEL_DIR / "previous_model.joblib"
-PREV_METRICS_PATH  = MODEL_DIR / "previous_metrics.json"
+PROCESSED_DATASET = PROCESSED_DATA_DIR / "processed_dataset.csv"
+MODEL_DIR         = Path(__file__).resolve().parents[1] / "models"
+MODEL_PATH        = MODEL_DIR / "best_model.joblib"
+SCALER_PATH       = MODEL_DIR / "scaler.joblib"
+PREV_MODEL_PATH   = MODEL_DIR / "previous_model.joblib"
+PREV_METRICS_PATH = MODEL_DIR / "previous_metrics.json"
 
-VALIDATION_REPORT  = REPORTS_DIR / "validation_report.json"
-CONFUSION_MATRIX   = REPORTS_DIR / "confusion_matrix.png"
-THRESHOLD_PLOT     = REPORTS_DIR / "threshold_analysis.png"
+VALIDATION_REPORT = REPORTS_DIR / "validation_report.json"
+CONFUSION_MATRIX  = REPORTS_DIR / "confusion_matrix.png"
+THRESHOLD_PLOT    = REPORTS_DIR / "threshold_analysis.png"
 
-MIN_AUC_THRESHOLD  = 0.85   # Validation gate — model must exceed this
-TARGET_COLUMN      = "failed"
+MIN_AUC_THRESHOLD = 0.85
+TARGET_COLUMN     = "failed"
 
-# Columns to drop before training (non-feature columns)
 DROP_COLUMNS = [
     "run_id", "trigger_time",
     "failure_type", "error_message",
@@ -90,16 +90,17 @@ DROP_COLUMNS = [
 
 
 # ---------------------------------------------------------------------------
-# 1. Data Loading & Model Training
+# 1. Data Loading
 # ---------------------------------------------------------------------------
 
 def load_and_split_data():
     """
     Load processed dataset and split into train/test (85/15).
+    Applies StandardScaler — required for MLP neural networks.
 
     Returns
     -------
-    X_train, X_test, y_train, y_test : split DataFrames/Series
+    X_train_scaled, X_test_scaled, y_train, y_test
     """
     logger.info("Loading processed dataset from: %s", PROCESSED_DATASET)
 
@@ -109,7 +110,7 @@ def load_and_split_data():
     df = pd.read_csv(PROCESSED_DATASET)
     logger.info("Dataset loaded: %d rows x %d columns", len(df), df.shape[1])
 
-    # Drop non-feature columns that exist in this dataset
+    # Drop non-feature columns
     cols_to_drop = [c for c in DROP_COLUMNS if c in df.columns]
     X = df.drop(columns=cols_to_drop + [TARGET_COLUMN])
     y = df[TARGET_COLUMN]
@@ -122,55 +123,75 @@ def load_and_split_data():
         X, y, test_size=0.15, random_state=42, stratify=y
     )
 
+    # Scale features — MLP requires normalized input
+    scaler = StandardScaler()
+    X_train_scaled = scaler.fit_transform(X_train)
+    X_test_scaled  = scaler.transform(X_test)
+
+    # Save scaler for future use
+    MODEL_DIR.mkdir(parents=True, exist_ok=True)
+    joblib.dump(scaler, SCALER_PATH)
+    logger.info("Scaler saved to: %s", SCALER_PATH)
+
     logger.info(
         "Split — Train: %d | Test: %d | Failure rate in test: %.2f%%",
         len(X_train), len(X_test), y_test.mean() * 100
     )
-    return X_train, X_test, y_train, y_test
+    return X_train_scaled, X_test_scaled, y_train, y_test
 
 
-def train_model(X_train, y_train) -> XGBClassifier:
+# ---------------------------------------------------------------------------
+# 2. Model Training
+# ---------------------------------------------------------------------------
+
+def train_model(X_train, y_train) -> MLPClassifier:
     """
-    Train XGBoost classifier on training data.
+    Train MLP Neural Network classifier.
+
+    Architecture:
+    - Input layer  : 17 features
+    - Hidden layer 1: 128 neurons (ReLU)
+    - Hidden layer 2: 64 neurons (ReLU)
+    - Hidden layer 3: 32 neurons (ReLU)
+    - Output layer : 1 neuron (Sigmoid)
 
     Parameters
     ----------
-    X_train : pd.DataFrame
-    y_train : pd.Series
+    X_train : np.ndarray — scaled training features
+    y_train : pd.Series  — training labels
 
     Returns
     -------
-    XGBClassifier — trained model
+    MLPClassifier — trained model
     """
-    logger.info("Training XGBoost model...")
+    logger.info("Training MLP Neural Network...")
+    logger.info("Architecture: 17 → 128 → 64 → 32 → 1")
 
-    # Handle class imbalance with scale_pos_weight
-    neg = (y_train == 0).sum()
-    pos = (y_train == 1).sum()
-    scale = neg / pos
-    logger.info("Class imbalance ratio: %.2f (scale_pos_weight=%.2f)", scale, scale)
-
-    model = XGBClassifier(
-        n_estimators=200,
-        max_depth=6,
-        learning_rate=0.1,
-        subsample=0.8,
-        colsample_bytree=0.8,
-        scale_pos_weight=scale,
+    model = MLPClassifier(
+        hidden_layer_sizes=(128, 64, 32),  # 3 hidden layers
+        activation="relu",                  # ReLU activation
+        solver="adam",                      # Adam optimizer
+        alpha=0.001,                        # L2 regularization
+        batch_size=256,                     # mini-batch size
+        learning_rate="adaptive",           # reduces LR when loss plateaus
+        learning_rate_init=0.001,           # initial learning rate
+        max_iter=100,                       # max epochs
         random_state=42,
-        eval_metric="logloss",
-        verbosity=0,
+        early_stopping=True,               # stop if val loss stops improving
+        validation_fraction=0.1,           # 10% of train for validation
+        n_iter_no_change=10,               # patience
+        verbose=False,
     )
+
     model.fit(X_train, y_train)
-    logger.info("XGBoost model training complete.")
+    logger.info("MLP training complete. Iterations: %d", model.n_iter_)
     return model
 
 
-def save_model(model: XGBClassifier) -> None:
+def save_model(model: MLPClassifier) -> None:
     """Save trained model to disk."""
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
-    # If a best model already exists, move it to previous
     if MODEL_PATH.exists():
         logger.info("Moving existing model to previous_model.joblib")
         prev_model = joblib.load(MODEL_PATH)
@@ -180,50 +201,34 @@ def save_model(model: XGBClassifier) -> None:
     logger.info("Model saved to: %s", MODEL_PATH)
 
 
-def load_model() -> XGBClassifier:
-    """Load trained model from disk."""
-    if not MODEL_PATH.exists():
-        raise FileNotFoundError(f"No model found at: {MODEL_PATH}")
-    return joblib.load(MODEL_PATH)
-
-
 # ---------------------------------------------------------------------------
-# 2. Hold-out Evaluation
+# 3. Hold-out Evaluation
 # ---------------------------------------------------------------------------
 
 def evaluate_model(model, X_test, y_test) -> dict:
     """
-    Evaluate model on hold-out test set (15%).
-
-    Computes: accuracy, precision, recall, F1, AUC-ROC, AUC-PR
-
-    Parameters
-    ----------
-    model   : trained XGBClassifier
-    X_test  : pd.DataFrame
-    y_test  : pd.Series
+    Evaluate MLP model on hold-out test set (15%).
 
     Returns
     -------
-    dict — evaluation metrics
+    tuple — (metrics dict, y_pred, y_pred_proba)
     """
     logger.info("--- Hold-out Evaluation (15%% test set) ---")
 
     y_pred       = model.predict(X_test)
     y_pred_proba = model.predict_proba(X_test)[:, 1]
 
-    # Core metrics
     accuracy  = accuracy_score(y_test, y_pred)
     precision = precision_score(y_test, y_pred, zero_division=0)
     recall    = recall_score(y_test, y_pred, zero_division=0)
     f1        = f1_score(y_test, y_pred, zero_division=0)
     auc_roc   = roc_auc_score(y_test, y_pred_proba)
 
-    # AUC-PR
     p_curve, r_curve, _ = precision_recall_curve(y_test, y_pred_proba)
     auc_pr = auc(r_curve, p_curve)
 
     metrics = {
+        "model"     : "MLP Neural Network",
         "accuracy"  : round(float(accuracy),  4),
         "precision" : round(float(precision), 4),
         "recall"    : round(float(recall),    4),
@@ -245,18 +250,11 @@ def evaluate_model(model, X_test, y_test) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# 3. Confusion Matrix & Classification Report
+# 4. Confusion Matrix
 # ---------------------------------------------------------------------------
 
 def generate_confusion_matrix(y_test, y_pred) -> None:
-    """
-    Generate and save confusion matrix heatmap as PNG.
-
-    Parameters
-    ----------
-    y_test : pd.Series — true labels
-    y_pred : np.ndarray — predicted labels
-    """
+    """Generate and save confusion matrix heatmap."""
     logger.info("--- Generating Confusion Matrix ---")
 
     cm = confusion_matrix(y_test, y_pred)
@@ -271,11 +269,10 @@ def generate_confusion_matrix(y_test, y_pred) -> None:
         yticklabels=["No Failure (0)", "Failure (1)"],
         ax=ax,
     )
-    ax.set_title("Confusion Matrix — Pipeline Failure Prediction", fontsize=14, pad=15)
+    ax.set_title("Confusion Matrix — MLP Neural Network", fontsize=14, pad=15)
     ax.set_xlabel("Predicted Label", fontsize=12)
     ax.set_ylabel("True Label", fontsize=12)
 
-    # Add metric annotations
     tn, fp, fn, tp = cm.ravel()
     ax.text(
         0.5, -0.12,
@@ -291,18 +288,7 @@ def generate_confusion_matrix(y_test, y_pred) -> None:
 
 
 def generate_classification_report(y_test, y_pred) -> dict:
-    """
-    Generate classification report as dictionary.
-
-    Parameters
-    ----------
-    y_test : pd.Series
-    y_pred : np.ndarray
-
-    Returns
-    -------
-    dict — classification report
-    """
+    """Generate classification report as dictionary."""
     report = classification_report(
         y_test, y_pred,
         target_names=["No Failure", "Failure"],
@@ -314,23 +300,16 @@ def generate_classification_report(y_test, y_pred) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# 4. Threshold Analysis
+# 5. Threshold Analysis
 # ---------------------------------------------------------------------------
 
 def threshold_analysis(y_test, y_pred_proba) -> dict:
     """
-    Vary decision threshold from 0.1 to 0.9 and compute metrics at each threshold.
-    Finds the optimal threshold for F1 score.
-    Generates and saves threshold-vs-metric plot.
-
-    Parameters
-    ----------
-    y_test       : pd.Series — true labels
-    y_pred_proba : np.ndarray — predicted probabilities
+    Vary decision threshold 0.1-0.9, find optimal F1, generate plot.
 
     Returns
     -------
-    dict — threshold analysis results including optimal threshold
+    dict — threshold analysis results
     """
     logger.info("--- Threshold Analysis (0.1 to 0.9) ---")
 
@@ -338,11 +317,11 @@ def threshold_analysis(y_test, y_pred_proba) -> dict:
     results = []
 
     for thresh in thresholds:
-        y_pred_t   = (y_pred_proba >= thresh).astype(int)
-        precision  = precision_score(y_test, y_pred_t, zero_division=0)
-        recall     = recall_score(y_test, y_pred_t, zero_division=0)
-        f1         = f1_score(y_test, y_pred_t, zero_division=0)
-        accuracy   = accuracy_score(y_test, y_pred_t)
+        y_pred_t  = (y_pred_proba >= thresh).astype(int)
+        precision = precision_score(y_test, y_pred_t, zero_division=0)
+        recall    = recall_score(y_test, y_pred_t, zero_division=0)
+        f1        = f1_score(y_test, y_pred_t, zero_division=0)
+        accuracy  = accuracy_score(y_test, y_pred_t)
 
         results.append({
             "threshold" : round(float(thresh), 1),
@@ -356,78 +335,57 @@ def threshold_analysis(y_test, y_pred_proba) -> dict:
             thresh, precision, recall, f1
         )
 
-    # Find optimal threshold (max F1)
     best = max(results, key=lambda x: x["f1_score"])
-    logger.info(
-        "Optimal threshold: %.1f (F1=%.4f)", best["threshold"], best["f1_score"]
-    )
+    logger.info("Optimal threshold: %.1f (F1=%.4f)", best["threshold"], best["f1_score"])
 
-    # ── Plot ────────────────────────────────────────────────────────────────
-    df_results = pd.DataFrame(results)
-
+    # Plot
+    df_r = pd.DataFrame(results)
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5))
 
-    # Left: metrics vs threshold
-    ax1.plot(df_results["threshold"], df_results["f1_score"],
-             "b-o", label="F1 Score", linewidth=2)
-    ax1.plot(df_results["threshold"], df_results["precision"],
-             "g-s", label="Precision", linewidth=2)
-    ax1.plot(df_results["threshold"], df_results["recall"],
-             "r-^", label="Recall", linewidth=2)
-    ax1.plot(df_results["threshold"], df_results["accuracy"],
-             "m-d", label="Accuracy", linewidth=2)
+    ax1.plot(df_r["threshold"], df_r["f1_score"],  "b-o", label="F1 Score",  linewidth=2)
+    ax1.plot(df_r["threshold"], df_r["precision"], "g-s", label="Precision", linewidth=2)
+    ax1.plot(df_r["threshold"], df_r["recall"],    "r-^", label="Recall",    linewidth=2)
+    ax1.plot(df_r["threshold"], df_r["accuracy"],  "m-d", label="Accuracy",  linewidth=2)
     ax1.axvline(x=best["threshold"], color="orange", linestyle="--",
                 linewidth=2, label=f"Optimal={best['threshold']}")
     ax1.set_xlabel("Decision Threshold", fontsize=12)
     ax1.set_ylabel("Score", fontsize=12)
-    ax1.set_title("Metrics vs Decision Threshold", fontsize=13)
+    ax1.set_title("Metrics vs Decision Threshold (MLP)", fontsize=13)
     ax1.legend(fontsize=10)
     ax1.grid(True, alpha=0.3)
     ax1.set_xticks(thresholds)
 
-    # Right: F1 bar chart per threshold
     colors = ["orange" if t == best["threshold"] else "steelblue"
-              for t in df_results["threshold"]]
-    ax2.bar(df_results["threshold"].astype(str), df_results["f1_score"],
+              for t in df_r["threshold"]]
+    ax2.bar(df_r["threshold"].astype(str), df_r["f1_score"],
             color=colors, edgecolor="black", linewidth=0.5)
     ax2.set_xlabel("Decision Threshold", fontsize=12)
     ax2.set_ylabel("F1 Score", fontsize=12)
     ax2.set_title("F1 Score per Threshold (orange = optimal)", fontsize=13)
     ax2.grid(True, alpha=0.3, axis="y")
 
-    plt.suptitle("Threshold Analysis — Pipeline Failure Prediction",
+    plt.suptitle("Threshold Analysis — MLP Neural Network",
                  fontsize=14, fontweight="bold", y=1.02)
     plt.tight_layout()
     plt.savefig(THRESHOLD_PLOT, dpi=150, bbox_inches="tight")
     plt.close()
-    logger.info("Threshold analysis plot saved to: %s", THRESHOLD_PLOT)
+    logger.info("Threshold plot saved to: %s", THRESHOLD_PLOT)
 
     return {
-        "thresholds"         : results,
-        "optimal_threshold"  : best["threshold"],
-        "optimal_f1"         : best["f1_score"],
-        "optimal_precision"  : best["precision"],
-        "optimal_recall"     : best["recall"],
+        "thresholds"        : results,
+        "optimal_threshold" : best["threshold"],
+        "optimal_f1"        : best["f1_score"],
+        "optimal_precision" : best["precision"],
+        "optimal_recall"    : best["recall"],
     }
 
 
 # ---------------------------------------------------------------------------
-# 5. Validation Gate
+# 6. Validation Gate
 # ---------------------------------------------------------------------------
 
 def validation_gate(auc_roc: float) -> dict:
-    """
-    Pass/fail logic: model must exceed MIN_AUC_THRESHOLD (0.85) to proceed.
-    Blocks deployment if AUC-ROC is below threshold.
-
-    Parameters
-    ----------
-    auc_roc : float — model's AUC-ROC score
-
-    Returns
-    -------
-    dict — gate result with status and message
-    """
+    """Pass/fail logic: AUC-ROC must exceed MIN_AUC_THRESHOLD (0.85)."""
     logger.info("--- Validation Gate ---")
     logger.info("AUC-ROC: %.4f | Minimum required: %.2f", auc_roc, MIN_AUC_THRESHOLD)
 
@@ -435,20 +393,16 @@ def validation_gate(auc_roc: float) -> dict:
 
     if passed:
         status  = "PASSED"
-        message = (
-            f"Model PASSED validation gate. "
-            f"AUC-ROC={auc_roc:.4f} >= threshold={MIN_AUC_THRESHOLD}. "
-            f"Deployment approved."
-        )
-        logger.info("VALIDATION GATE: PASSED ✓")
+        message = (f"Model PASSED validation gate. "
+                   f"AUC-ROC={auc_roc:.4f} >= threshold={MIN_AUC_THRESHOLD}. "
+                   f"Deployment approved.")
+        logger.info("VALIDATION GATE: PASSED")
     else:
         status  = "FAILED"
-        message = (
-            f"Model FAILED validation gate. "
-            f"AUC-ROC={auc_roc:.4f} < threshold={MIN_AUC_THRESHOLD}. "
-            f"Deployment BLOCKED."
-        )
-        logger.warning("VALIDATION GATE: FAILED ✗ — Deployment blocked!")
+        message = (f"Model FAILED validation gate. "
+                   f"AUC-ROC={auc_roc:.4f} < threshold={MIN_AUC_THRESHOLD}. "
+                   f"Deployment BLOCKED.")
+        logger.warning("VALIDATION GATE: FAILED — Deployment blocked!")
 
     return {
         "status"        : status,
@@ -460,25 +414,13 @@ def validation_gate(auc_roc: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# 6. Rollback Mechanism
+# 7. Rollback Mechanism
 # ---------------------------------------------------------------------------
 
 def rollback_check(current_auc: float) -> dict:
-    """
-    Compare new model AUC vs previous best model.
-    If new model is worse, reject it and keep previous model.
-
-    Parameters
-    ----------
-    current_auc : float — new model's AUC-ROC
-
-    Returns
-    -------
-    dict — rollback decision
-    """
+    """Compare new model AUC vs previous. Rollback if worse."""
     logger.info("--- Rollback Mechanism ---")
 
-    # No previous model exists — first run
     if not PREV_METRICS_PATH.exists():
         logger.info("No previous model found. Current model accepted as baseline.")
         return {
@@ -489,7 +431,6 @@ def rollback_check(current_auc: float) -> dict:
             "rollback_needed": False,
         }
 
-    # Load previous metrics
     with open(PREV_METRICS_PATH) as f:
         prev_metrics = json.load(f)
 
@@ -499,24 +440,16 @@ def rollback_check(current_auc: float) -> dict:
 
     if current_auc >= prev_auc:
         decision = "ACCEPTED"
-        reason   = (
-            f"New model (AUC={current_auc:.4f}) is better than or equal to "
-            f"previous (AUC={prev_auc:.4f}). Keeping new model."
-        )
+        reason   = (f"New model (AUC={current_auc:.4f}) >= "
+                    f"previous (AUC={prev_auc:.4f}). Keeping new model.")
         logger.info("ROLLBACK: Not needed. New model accepted.")
     else:
         decision = "ROLLED BACK"
-        reason   = (
-            f"New model (AUC={current_auc:.4f}) is WORSE than "
-            f"previous (AUC={prev_auc:.4f}). Rolling back to previous model."
-        )
-        logger.warning("ROLLBACK: New model rejected! Restoring previous model.")
-
-        # Restore previous model
+        reason   = (f"New model (AUC={current_auc:.4f}) < "
+                    f"previous (AUC={prev_auc:.4f}). Rolling back!")
+        logger.warning("ROLLBACK: Restoring previous model.")
         if PREV_MODEL_PATH.exists():
-            prev_model = joblib.load(PREV_MODEL_PATH)
-            joblib.dump(prev_model, MODEL_PATH)
-            logger.info("Previous model restored successfully.")
+            joblib.dump(joblib.load(PREV_MODEL_PATH), MODEL_PATH)
 
     return {
         "decision"       : decision,
@@ -528,112 +461,88 @@ def rollback_check(current_auc: float) -> dict:
 
 
 # ---------------------------------------------------------------------------
-# Save Validation Report
+# Save outputs
 # ---------------------------------------------------------------------------
 
-def save_validation_report(
-    metrics: dict,
-    classification_rep: dict,
-    threshold_results: dict,
-    gate_result: dict,
-    rollback_result: dict,
-) -> Path:
-    """
-    Save full validation report as JSON.
-
-    Returns
-    -------
-    Path — path to saved report
-    """
+def save_validation_report(metrics, class_report, threshold_results,
+                            gate_result, rollback_result) -> Path:
+    """Save full validation report as JSON."""
     report = {
-        "model"               : "XGBoost",
-        "dataset"             : str(PROCESSED_DATASET),
-        "test_size_percent"   : 15,
-        "hold_out_metrics"    : metrics,
-        "classification_report": classification_rep,
-        "threshold_analysis"  : threshold_results,
-        "validation_gate"     : gate_result,
-        "rollback"            : rollback_result,
+        "model"                : "MLP Neural Network",
+        "architecture"         : "17 → 128 → 64 → 32 → 1",
+        "dataset"              : str(PROCESSED_DATASET),
+        "test_size_percent"    : 15,
+        "hold_out_metrics"     : metrics,
+        "classification_report": class_report,
+        "threshold_analysis"   : threshold_results,
+        "validation_gate"      : gate_result,
+        "rollback"             : rollback_result,
     }
-
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     with open(VALIDATION_REPORT, "w") as f:
         json.dump(report, f, indent=2)
-
     logger.info("Validation report saved to: %s", VALIDATION_REPORT)
     return VALIDATION_REPORT
 
 
-# ---------------------------------------------------------------------------
-# Save metrics for future rollback comparison
-# ---------------------------------------------------------------------------
-
 def save_current_metrics(metrics: dict) -> None:
-    """Save current model metrics for future rollback comparison."""
+    """Save current metrics for future rollback comparison."""
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
     with open(PREV_METRICS_PATH, "w") as f:
         json.dump(metrics, f, indent=2)
-    logger.info("Current metrics saved for future rollback comparison.")
+    logger.info("Metrics saved for future rollback comparison.")
 
 
 # ---------------------------------------------------------------------------
-# Main orchestration
+# Main
 # ---------------------------------------------------------------------------
 
 def run_model_validation() -> dict:
-    """
-    Full model validation pipeline:
-    1. Load data and train model
-    2. Hold-out evaluation
-    3. Confusion matrix + classification report
-    4. Threshold analysis
-    5. Validation gate
-    6. Rollback check
-    7. Save all outputs
-    """
+    """Full model validation pipeline."""
     logger.info("=" * 60)
-    logger.info("MODEL VALIDATION START")
+    logger.info("MODEL VALIDATION START (MLP Neural Network)")
     logger.info("=" * 60)
 
     ensure_directories_exist()
     REPORTS_DIR.mkdir(parents=True, exist_ok=True)
     MODEL_DIR.mkdir(parents=True, exist_ok=True)
 
-    # 1. Load data and train
+    # 1. Load and split
     X_train, X_test, y_train, y_test = load_and_split_data()
+
+    # 2. Train MLP
     model = train_model(X_train, y_train)
     save_model(model)
 
-    # 2. Hold-out evaluation
+    # 3. Evaluate
     metrics, y_pred, y_pred_proba = evaluate_model(model, X_test, y_test)
 
-    # 3. Confusion matrix + classification report
+    # 4. Confusion matrix
     generate_confusion_matrix(y_test, y_pred)
     class_report = generate_classification_report(y_test, y_pred)
 
-    # 4. Threshold analysis
+    # 5. Threshold analysis
     threshold_results = threshold_analysis(y_test, y_pred_proba)
 
-    # 5. Validation gate
+    # 6. Validation gate
     gate_result = validation_gate(metrics["auc_roc"])
 
-    # 6. Rollback check
+    # 7. Rollback
     rollback_result = rollback_check(metrics["auc_roc"])
 
-    # 7. Save report + metrics
-    save_validation_report(
-        metrics, class_report, threshold_results, gate_result, rollback_result
-    )
+    # 8. Save everything
+    save_validation_report(metrics, class_report, threshold_results,
+                           gate_result, rollback_result)
     save_current_metrics(metrics)
 
-    # Final summary
     logger.info("=" * 60)
     logger.info("MODEL VALIDATION COMPLETE")
-    logger.info("AUC-ROC         : %.4f", metrics["auc_roc"])
-    logger.info("F1 Score        : %.4f", metrics["f1_score"])
-    logger.info("Optimal Threshold: %.1f", threshold_results["optimal_threshold"])
-    logger.info("Validation Gate : %s", gate_result["status"])
-    logger.info("Rollback        : %s", rollback_result["decision"])
+    logger.info("Model          : MLP Neural Network (128→64→32)")
+    logger.info("AUC-ROC        : %.4f", metrics["auc_roc"])
+    logger.info("F1 Score       : %.4f", metrics["f1_score"])
+    logger.info("Optimal Thresh : %.1f", threshold_results["optimal_threshold"])
+    logger.info("Validation Gate: %s",   gate_result["status"])
+    logger.info("Rollback       : %s",   rollback_result["decision"])
     logger.info("=" * 60)
 
     return {
@@ -651,7 +560,7 @@ if __name__ == "__main__":
     results = run_model_validation()
 
     print("\n" + "=" * 60)
-    print("VALIDATION SUMMARY")
+    print("VALIDATION SUMMARY — MLP Neural Network")
     print("=" * 60)
     print(f"Accuracy         : {results['metrics']['accuracy']:.4f}")
     print(f"Precision        : {results['metrics']['precision']:.4f}")
