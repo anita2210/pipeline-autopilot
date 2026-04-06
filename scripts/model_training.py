@@ -46,8 +46,17 @@ except PermissionError:
 
 TARGET_COL  = "failed"
 RANDOM_SEED = 42
-DROP_COLS   = ["run_id","trigger_time","failure_type","error_message","pipeline_name","repo"]
 
+DROP_COLS = [
+    "run_id",                 # identifier, not a feature
+    "trigger_time",           # already extracted into day_of_week, hour, is_weekend
+    "failure_type",           # post-run metadata — not available at prediction time
+    "error_message",          # post-run metadata — not available at prediction time
+    "failure_type_encoded",   # encoded version of failure_type — same leakage
+    "error_message_encoded",  # encoded version of error_message — same leakage
+    "pipeline_name",          # high cardinality identifier
+    "repo",                   # high cardinality identifier
+]
 
 def load_data(path=DATA_PATH):
     logger.info(f"Loading data from: {path}")
