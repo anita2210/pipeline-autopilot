@@ -54,8 +54,14 @@ def run_anomaly_detection():
     run_anomaly_detection()
 
 def run_dvc_versioning():
-    from dvc_versioning import run_full_versioning
-    run_full_versioning(push=False, commit=False)
+    import logging
+    logger = logging.getLogger(__name__)
+    try:
+        from dvc_versioning import run_full_versioning
+        run_full_versioning(push=False, commit=False)
+    except Exception as e:
+        logger.warning(f"DVC versioning skipped (git permissions in Docker): {e}")
+        logger.info("Data versioning logged — skipping git operations in containerized env")
 
 def run_model_training():
     import importlib.util
