@@ -38,7 +38,7 @@ def run_data_preprocessing():
     df = parse_datetime(df)
     df, _ = encode_categoricals(df)
     df = validate_features(df)
-    save_processed_data(df)
+    save_processed_data(df, "/opt/airflow/data/processed/final_dataset_processed.csv")
     logger.info(f"Preprocessing complete. Shape: {df.shape}")
 
 def run_schema_validation():
