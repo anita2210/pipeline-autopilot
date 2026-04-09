@@ -46,7 +46,7 @@ except PermissionError:
 
 TARGET_COL  = "failed"
 RANDOM_SEED = 42
-DROP_COLS   = ["run_id","trigger_time","failure_type","error_message","pipeline_name","repo"]
+DROP_COLS   = ["run_id","trigger_time","failure_type","error_message","failure_type_encoded","error_message_encoded","pipeline_name","repo"]
 
 
 def load_data(path=DATA_PATH):
