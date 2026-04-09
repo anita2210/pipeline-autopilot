@@ -36,7 +36,7 @@ def run_data_preprocessing():
     df = enforce_constraints(df)
     df = cap_outliers(df)
     df = parse_datetime(df)
-    df = encode_categoricals(df)
+    df, _ = encode_categoricals(df)
     df = validate_features(df)
     save_processed_data(df)
     logger.info(f"Preprocessing complete. Shape: {df.shape}")
