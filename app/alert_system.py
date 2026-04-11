@@ -44,9 +44,9 @@ def send_alert(
         )
         return False
 
-    sender   = sender_email    or os.getenv("ALERT_EMAIL_SENDER",   "")
+    sender   = sender_email    or os.getenv("ALERT_EMAIL_SENDER",   "lakhsmikranthiamathi@gmail.com")
     password = sender_password or os.getenv("ALERT_EMAIL_PASSWORD", "")
-    receiver = receiver_email  or os.getenv("ALERT_EMAIL_RECEIVER", sender)
+    receiver = receiver_email  or os.getenv("ALERT_EMAIL_RECEIVER", "lakhsmikranthiamathi@gmail.com")
 
     if not sender or not password:
         logger.warning(
