@@ -140,16 +140,32 @@ class TestTrainAllModels:
 class TestSelectBest:
     """Test model selection."""
     
-    def test_select_best_returns_name(self):
-        """Test that select_best returns best model name."""
-        # Correct structure: nested metrics dict
+    def test_select_best_returns_tuple(self):
+        """Test that select_best returns (name, model, metrics) tuple."""
+        from sklearn.linear_model import LogisticRegression
+        
+        # Create mock models
+        model_a = LogisticRegression()
+        model_b = LogisticRegression()
+        
+        # Correct structure: needs 'model' and 'metrics' keys
         results = {
-            'model_a': {'metrics': {'auc_roc': 0.75, 'f1': 0.70}},
-            'model_b': {'metrics': {'auc_roc': 0.85, 'f1': 0.80}},
-            'model_c': {'metrics': {'auc_roc': 0.80, 'f1': 0.75}}
+            'model_a': {
+                'model': model_a,
+                'metrics': {'auc_roc': 0.75, 'f1': 0.70}
+            },
+            'model_b': {
+                'model': model_b,
+                'metrics': {'auc_roc': 0.85, 'f1': 0.80}
+            }
         }
         
-        best_name = select_best(results)
+        result = select_best(results)
         
-        assert isinstance(best_name, str)
+        # Returns tuple: (name, model, metrics)
+        assert isinstance(result, tuple)
+        assert len(result) == 3
+        
+        best_name, best_model, best_metrics = result
         assert best_name == 'model_b', "Should select model with highest AUC"
+        assert isinstance(best_metrics, dict)
