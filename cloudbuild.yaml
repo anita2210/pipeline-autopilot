@@ -1,0 +1,44 @@
+steps:
+  # 1. Build Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/pipeline-autopilot:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/pipeline-autopilot:latest'
+      - '-f'
+      - 'Dockerfile.app'
+      - '.'
+
+  # 2. Push to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/pipeline-autopilot:$COMMIT_SHA']
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/pipeline-autopilot:latest']
+
+  # 3. Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'pipeline-autopilot'
+      - '--image=gcr.io/datapipeline-autopilot/pipeline-autopilot:$COMMIT_SHA'
+      - '--region=us-central1'
+      - '--platform=managed'
+      - '--allow-unauthenticated'
+      - '--port=8080'
+      - '--memory=2Gi'
+      - '--cpu=2'
+      - '--min-instances=0'
+      - '--max-instances=3'
+      - '--timeout=60'
+
+images:
+  - 'gcr.io/$PROJECT_ID/pipeline-autopilot:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/pipeline-autopilot:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

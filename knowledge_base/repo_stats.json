@@ -1,0 +1,122 @@
+{
+  "local/simulated/deployment_pipeline": {
+    "failure_rate": 0.0491,
+    "total_runs": 10000,
+    "total_failures": 491,
+    "avg_duration": 180.32
+  },
+  "local/simulated/model_training_pipeline": {
+    "failure_rate": 0.1231,
+    "total_runs": 10000,
+    "total_failures": 1231,
+    "avg_duration": 1094.89
+  },
+  "local/simulated/data_quality_checks": {
+    "failure_rate": 0.1007,
+    "total_runs": 10000,
+    "total_failures": 1007,
+    "avg_duration": 106.24
+  },
+  "local/simulated/transform_etl_pipeline": {
+    "failure_rate": 0.0621,
+    "total_runs": 10000,
+    "total_failures": 621,
+    "avg_duration": 350.39
+  },
+  "local/simulated/ingestion_api_pipeline": {
+    "failure_rate": 0.0784,
+    "total_runs": 10000,
+    "total_failures": 784,
+    "avg_duration": 143.11
+  },
+  "pandas-dev/pandas": {
+    "failure_rate": 0.1224,
+    "total_runs": 2426,
+    "total_failures": 297,
+    "avg_duration": 505.3
+  },
+  "bentoml/BentoML": {
+    "failure_rate": 0.1344,
+    "total_runs": 2418,
+    "total_failures": 325,
+    "avg_duration": 259.22
+  },
+  "apache/kafka": {
+    "failure_rate": 0.1237,
+    "total_runs": 2417,
+    "total_failures": 299,
+    "avg_duration": 215.49
+  },
+  "pytorch/pytorch": {
+    "failure_rate": 0.1296,
+    "total_runs": 2407,
+    "total_failures": 312,
+    "avg_duration": 558.08
+  },
+  "great-expectations/great_expectations": {
+    "failure_rate": 0.1596,
+    "total_runs": 2393,
+    "total_failures": 382,
+    "avg_duration": 512.66
+  },
+  "redis/redis": {
+    "failure_rate": 0.0652,
+    "total_runs": 2391,
+    "total_failures": 156,
+    "avg_duration": 507.79
+  },
+  "crossplane/crossplane": {
+    "failure_rate": 0.1536,
+    "total_runs": 2390,
+    "total_failures": 367,
+    "avg_duration": 301.42
+  },
+  "timescale/timescaledb": {
+    "failure_rate": 0.1503,
+    "total_runs": 2389,
+    "total_failures": 359,
+    "avg_duration": 252.37
+  },
+  "apache/airflow": {
+    "failure_rate": 0.1734,
+    "total_runs": 2387,
+    "total_failures": 414,
+    "avg_duration": 778.02
+  },
+  "dbt-labs/dbt-core": {
+    "failure_rate": 0.0659,
+    "total_runs": 2383,
+    "total_failures": 157,
+    "avg_duration": 250.54
+  },
+  "minio/minio": {
+    "failure_rate": 0.1176,
+    "total_runs": 2380,
+    "total_failures": 280,
+    "avg_duration": 651.41
+  },
+  "elastic/elasticsearch": {
+    "failure_rate": 0.0072,
+    "total_runs": 2375,
+    "total_failures": 17,
+    "avg_duration": 49.34
+  },
+  "apache/spark": {
+    "failure_rate": 0.1112,
+    "total_runs": 2374,
+    "total_failures": 264,
+    "avg_duration": 555.03
+  },
+  "tensorflow/tensorflow": {
+    "failure_rate": 0.0084,
+    "total_runs": 2371,
+    "total_failures": 20,
+    "avg_duration": 273.78
+  },
+  "evidentlyai/evidently": {
+    "failure_rate": 0.3108,
+    "total_runs": 2371,
+    "total_failures": 737,
+    "avg_duration": 692.32
+  }
+}

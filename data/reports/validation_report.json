@@ -1,41 +1,43 @@
 {
-  "model": "XGBoost",
-  "dataset": "/opt/airflow/data/processed/processed_dataset.csv",
+  "model": "MLP Neural Network",
+  "architecture": "17 \u2192 128 \u2192 64 \u2192 32 \u2192 1",
+  "dataset": "/Users/cgunal7/pipeline-autopilot-1/data/processed/processed_dataset.csv",
   "test_size_percent": 15,
   "hold_out_metrics": {
-    "accuracy": 0.9968,
-    "precision": 0.9765,
-    "recall": 0.9961,
-    "f1_score": 0.9862,
-    "auc_roc": 0.9999,
-    "auc_pr": 0.9995,
+    "model": "MLP Neural Network",
+    "accuracy": 0.996,
+    "precision": 0.9805,
+    "recall": 0.9843,
+    "f1_score": 0.9824,
+    "auc_roc": 0.9998,
+    "auc_pr": 0.9987,
     "test_size": 22500,
     "n_failures": 2550
   },
   "classification_report": {
     "No Failure": {
-      "precision": 0.9994974621840294,
-      "recall": 0.9969423558897244,
-      "f1-score": 0.9982182739842907,
+      "precision": 0.9979939819458375,
+      "recall": 0.9974937343358395,
+      "f1-score": 0.997743795437453,
       "support": 19950.0
     },
     "Failure": {
-      "precision": 0.9765474817377932,
-      "recall": 0.996078431372549,
-      "f1-score": 0.9862162686856921,
+      "precision": 0.98046875,
+      "recall": 0.984313725490196,
+      "f1-score": 0.9823874755381604,
       "support": 2550.0
     },
-    "accuracy": 0.9968444444444444,
+    "accuracy": 0.996,
     "macro avg": {
-      "precision": 0.9880224719609112,
-      "recall": 0.9965103936311367,
-      "f1-score": 0.9922172713349915,
+      "precision": 0.9892313659729188,
+      "recall": 0.9909037299130178,
+      "f1-score": 0.9900656354878067,
       "support": 22500.0
     },
     "weighted avg": {
-      "precision": 0.9968964644001225,
-      "recall": 0.9968444444444444,
-      "f1-score": 0.9968580467171163,
+      "precision": 0.996007788991976,
+      "recall": 0.996,
+      "f1-score": 0.9960034125155331,
       "support": 22500.0
     }
   },
@@ -43,85 +45,85 @@
     "thresholds": [
       {
         "threshold": 0.1,
-        "precision": 0.9604,
-        "recall": 0.9984,
-        "f1_score": 0.979,
-        "accuracy": 0.9952
+        "precision": 0.9391,
+        "recall": 0.9973,
+        "f1_score": 0.9673,
+        "accuracy": 0.9924
       },
       {
         "threshold": 0.2,
-        "precision": 0.9692,
-        "recall": 0.998,
-        "f1_score": 0.9834,
-        "accuracy": 0.9962
+        "precision": 0.957,
+        "recall": 0.9945,
+        "f1_score": 0.9754,
+        "accuracy": 0.9943
       },
       {
         "threshold": 0.3,
-        "precision": 0.9725,
-        "recall": 0.9969,
-        "f1_score": 0.9845,
-        "accuracy": 0.9964
+        "precision": 0.9652,
+        "recall": 0.9906,
+        "f1_score": 0.9777,
+        "accuracy": 0.9949
       },
       {
         "threshold": 0.4,
-        "precision": 0.9751,
-        "recall": 0.9969,
-        "f1_score": 0.9858,
-        "accuracy": 0.9968
+        "precision": 0.9741,
+        "recall": 0.9875,
+        "f1_score": 0.9807,
+        "accuracy": 0.9956
       },
       {
         "threshold": 0.5,
-        "precision": 0.9765,
-        "recall": 0.9961,
-        "f1_score": 0.9862,
-        "accuracy": 0.9968
+        "precision": 0.9805,
+        "recall": 0.9843,
+        "f1_score": 0.9824,
+        "accuracy": 0.996
       },
       {
         "threshold": 0.6,
-        "precision": 0.9799,
-        "recall": 0.9945,
-        "f1_score": 0.9872,
-        "accuracy": 0.9971
+        "precision": 0.9862,
+        "recall": 0.978,
+        "f1_score": 0.9821,
+        "accuracy": 0.996
       },
       {
         "threshold": 0.7,
-        "precision": 0.9841,
-        "recall": 0.9922,
-        "f1_score": 0.9881,
-        "accuracy": 0.9973
+        "precision": 0.9876,
+        "recall": 0.9663,
+        "f1_score": 0.9768,
+        "accuracy": 0.9948
       },
       {
         "threshold": 0.8,
-        "precision": 0.9871,
-        "recall": 0.9902,
-        "f1_score": 0.9886,
-        "accuracy": 0.9974
+        "precision": 0.9927,
+        "recall": 0.9596,
+        "f1_score": 0.9759,
+        "accuracy": 0.9946
       },
       {
         "threshold": 0.9,
-        "precision": 0.9917,
-        "recall": 0.9827,
-        "f1_score": 0.9872,
-        "accuracy": 0.9971
+        "precision": 0.9954,
+        "recall": 0.9416,
+        "f1_score": 0.9678,
+        "accuracy": 0.9929
       }
     ],
-    "optimal_threshold": 0.8,
-    "optimal_f1": 0.9886,
-    "optimal_precision": 0.9871,
-    "optimal_recall": 0.9902
+    "optimal_threshold": 0.5,
+    "optimal_f1": 0.9824,
+    "optimal_precision": 0.9805,
+    "optimal_recall": 0.9843
   },
   "validation_gate": {
     "status": "PASSED",
-    "auc_roc": 0.9999,
+    "auc_roc": 0.9998,
     "min_threshold": 0.85,
     "passed": true,
-    "message": "Model PASSED validation gate. AUC-ROC=0.9999 >= threshold=0.85. Deployment approved."
+    "message": "Model PASSED validation gate. AUC-ROC=0.9998 >= threshold=0.85. Deployment approved."
   },
   "rollback": {
-    "decision": "ACCEPTED",
-    "reason": "New model (AUC=0.9999) is better than or equal to previous (AUC=0.9999). Keeping new model.",
-    "current_auc": 0.9999,
+    "decision": "ROLLED BACK",
+    "reason": "New model (AUC=0.9998) < previous (AUC=0.9999). Rolling back!",
+    "current_auc": 0.9998,
     "previous_auc": 0.9999,
-    "rollback_needed": false
+    "rollback_needed": true
   }
 }

@@ -1,0 +1,102 @@
+{
+  "no_error": {
+    "count": 10451,
+    "percentage": 0.6149,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "RuntimeError: Worker crashed unexpectedly (SIGKILL)": {
+    "count": 395,
+    "percentage": 0.0232,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "OSError: No space left on device while writing intermediate file": {
+    "count": 390,
+    "percentage": 0.0229,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "ValueError: Null rate exceeded threshold in column 'amount' (null% = 42%)": {
+    "count": 379,
+    "percentage": 0.0223,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "ValueError: Duplicate key rate exceeded for primary key 'order_id'": {
+    "count": 379,
+    "percentage": 0.0223,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "AssertionError: Row count dropped by 65% compared to last run": {
+    "count": 374,
+    "percentage": 0.022,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "MemoryError: Out of memory while processing batch": {
+    "count": 339,
+    "percentage": 0.0199,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "KeyError: Column renamed - expected 'event_time' but found 'timestamp'": {
+    "count": 250,
+    "percentage": 0.0147,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "TimeoutError: Upstream API request timed out after 30s": {
+    "count": 233,
+    "percentage": 0.0137,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "TimeoutError: Read timed out while fetching upstream payload": {
+    "count": 232,
+    "percentage": 0.0137,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "KeyError: Missing expected column 'price' in incoming dataset": {
+    "count": 232,
+    "percentage": 0.0137,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "ValueError: Schema mismatch - column 'user_id' changed type int->string": {
+    "count": 231,
+    "percentage": 0.0136,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "ConnectionError: Failed to connect to upstream service (ECONNRESET)": {
+    "count": 210,
+    "percentage": 0.0124,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "Run": {
+    "count": 198,
+    "percentage": 0.0116,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "HTTPError 403: Forbidden - token expired or insufficient scope": {
+    "count": 173,
+    "percentage": 0.0102,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "PermissionError: Unauthorized access to secret manager": {
+    "count": 159,
+    "percentage": 0.0094,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "PermissionError: AccessDenied when reading from storage bucket": {
+    "count": 158,
+    "percentage": 0.0093,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "Run E2E Tests": {
+    "count": 90,
+    "percentage": 0.0053,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "Run tests": {
+    "count": 81,
+    "percentage": 0.0048,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  },
+  "Run Dependabot": {
+    "count": 70,
+    "percentage": 0.0041,
+    "suggested_fix": "Check logs and retry. Review recent code changes."
+  }
+}

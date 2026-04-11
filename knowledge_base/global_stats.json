@@ -1,0 +1,23 @@
+{
+  "total_runs": 149967,
+  "total_failures": 16996,
+  "failure_rate": 0.1133,
+  "avg_duration_seconds": 408.41,
+  "avg_retry_count": 0.1744,
+  "avg_failures_last_7_runs": 0.721,
+  "avg_workflow_failure_rate": 0.1091,
+  "top_failure_types": {
+    "success": 9397,
+    "runtime_error": 2137,
+    "data_quality": 1132,
+    "infra_failure": 1124,
+    "test_failure": 911
+  },
+  "top_error_messages": {
+    "no_error": 10451,
+    "RuntimeError: Worker crashed unexpectedly (SIGKILL)": 395,
+    "OSError: No space left on device while writing intermediate file": 390,
+    "ValueError: Null rate exceeded threshold in column 'amount' (null% = 42%)": 379,
+    "ValueError: Duplicate key rate exceeded for primary key 'order_id'": 379
+  }
+}
