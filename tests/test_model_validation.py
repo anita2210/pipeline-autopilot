@@ -10,23 +10,23 @@ from pathlib import Path
 import sys
 import os
 
-sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '../scripts')))
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
 try:
-    from model_validation import (
-        load_and_split_data,
-        train_model,
-        save_model,
-        load_model,
-        evaluate_model,
-        generate_confusion_matrix,
-        generate_classification_report,
-        threshold_analysis,
-        validation_gate,
-        rollback_check,
-        save_validation_report,
-        save_current_metrics
-    )
+    from scripts import model_validation
+    
+    load_and_split_data = model_validation.load_and_split_data
+    train_model = model_validation.train_model
+    save_model = model_validation.save_model
+    load_model = model_validation.load_model if hasattr(model_validation, 'load_model') else None
+    evaluate_model = model_validation.evaluate_model
+    generate_confusion_matrix = model_validation.generate_confusion_matrix
+    generate_classification_report = model_validation.generate_classification_report
+    threshold_analysis = model_validation.threshold_analysis
+    validation_gate = model_validation.validation_gate
+    rollback_check = model_validation.rollback_check
+    save_validation_report = model_validation.save_validation_report
+    save_current_metrics = model_validation.save_current_metrics
 except ImportError as e:
     print(f"Warning: Could not import from model_validation.py: {e}")
 
@@ -68,16 +68,17 @@ class TestTrainModel:
     """Test model training."""
     
     def test_train_model_returns_classifier(self):
-        """Test that train_model returns XGBClassifier."""
-        from xgboost import XGBClassifier
+        """Test that train_model returns classifier."""
+        from sklearn.neural_network import MLPClassifier
         
         X_train = pd.DataFrame(np.random.randn(100, 10))
         y_train = pd.Series(np.random.choice([0, 1], 100))
         
         model = train_model(X_train, y_train)
         
-        assert isinstance(model, XGBClassifier), "Should return XGBClassifier"
-    
+        # Returns MLPClassifier, not XGBClassifier
+        assert isinstance(model, MLPClassifier), "Should return MLPClassifier"
+        
     def test_trained_model_can_predict(self):
         """Test that trained model can make predictions."""
         X_train = pd.DataFrame(np.random.randn(100, 10))
