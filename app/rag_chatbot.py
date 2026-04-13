@@ -8,7 +8,7 @@ Functions:
 - get_hour_stats(hour)
 - get_similar_runs(features)
 - get_top_failure_type(similar_runs)
-- get_diagnosis(pipeline_features, failure_prob)
+- get_diagnosis(pipeline_features, failure_prob, user_message, chat_history)
 
 Author  : Member 3 (AI Engineer)
 Project : Pipeline Autopilot — CI/CD Failure Prediction System
@@ -23,7 +23,8 @@ from pathlib import Path
 
 import numpy as np
 import faiss
-from openai import OpenAI
+from google import genai
+from google.genai import types
 
 # ---------------------------------------------------------------------------
 # Logging
@@ -37,7 +38,7 @@ logger = logging.getLogger("rag_chatbot")
 KB_DIR = Path(__file__).resolve().parents[1] / "knowledge_base"
 
 # ---------------------------------------------------------------------------
-# Load knowledge base at startup (no pandas at runtime)
+# Load knowledge base at startup
 # ---------------------------------------------------------------------------
 def _load_json(filename):
     path = KB_DIR / filename
@@ -62,17 +63,18 @@ FAISS_DATA    = _load_faiss()
 logger.info("Knowledge base loaded successfully.")
 
 # ---------------------------------------------------------------------------
-# OpenAI Setup
+# Gemini Setup
 # ---------------------------------------------------------------------------
-OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-if OPENAI_API_KEY:
-    openai_client = OpenAI(api_key=OPENAI_API_KEY)
-    logger.info("OpenAI configured successfully.")
+GEMINI_API_KEY = os.environ.get("GEMINI_API_KEY", "")
+if GEMINI_API_KEY:
+    client = genai.Client(api_key=GEMINI_API_KEY)
+    logger.info("Gemini configured successfully.")
 else:
-    openai_client = None
-    logger.warning("OPENAI_API_KEY not set.")
+    client = None
+    logger.warning("GEMINI_API_KEY not set — chatbot will use fallback responses.")
+
 # ---------------------------------------------------------------------------
-# 5 Stats functions
+# Stats functions
 # ---------------------------------------------------------------------------
 
 def get_day_stats(day: int) -> dict:
@@ -87,7 +89,7 @@ def get_hour_stats(hour: int) -> dict:
 
 def get_similar_runs(features: dict, top_k: int = 5) -> list:
     """
-    Find top_k similar runs using FAISS index.
+    Find top_k similar runs using FAISS index built from 149K training rows.
     Returns list of dicts with similarity info.
     """
     feature_cols = FAISS_DATA["feature_cols"]
@@ -100,17 +102,31 @@ def get_similar_runs(features: dict, top_k: int = 5) -> list:
     if norm > 0:
         vector = vector / norm
 
-    distances, indices = FAISS_DATA["index"].search(vector, top_k)
-    labels = FAISS_DATA["labels"]
+    # Handle different FAISS versions
+    try:
+        # New FAISS API
+        distances, indices = FAISS_DATA["index"].search(vector, top_k)
+    except TypeError:
+        try:
+            # Old FAISS API with output arrays
+            distances = np.zeros((1, top_k), dtype=np.float32)
+            indices   = np.zeros((1, top_k), dtype=np.int64)
+            FAISS_DATA["index"].search_and_reconstruct(vector, top_k, distances, indices)
+        except Exception:
+            # Fallback: return first top_k labels directly
+            n = min(top_k, len(FAISS_DATA["labels"]))
+            distances = np.zeros((1, n), dtype=np.float32)
+            indices   = np.arange(n, dtype=np.int64).reshape(1, n)
+    labels        = FAISS_DATA["labels"]
     failure_types = FAISS_DATA["failure_types"]
 
     results = []
     for dist, idx in zip(distances[0], indices[0]):
         if idx < len(labels):
             results.append({
-                "index": int(idx),
-                "distance": round(float(dist), 4),
-                "failed": int(labels[idx]),
+                "index"       : int(idx),
+                "distance"    : round(float(dist), 4),
+                "failed"      : int(labels[idx]),
                 "failure_type": str(failure_types[idx]),
             })
     return results
@@ -131,62 +147,107 @@ def get_top_failure_type(similar_runs: list) -> str:
 def get_global_context() -> dict:
     """Return a compact version of global stats for Gemini prompt."""
     return {
-        "failure_rate": GLOBAL_STATS["failure_rate"],
-        "avg_retry_count": GLOBAL_STATS["avg_retry_count"],
-        "avg_failures_last_7_runs": GLOBAL_STATS["avg_failures_last_7_runs"],
-        "top_failure_types": list(GLOBAL_STATS["top_failure_types"].keys())[:3],
+        "failure_rate"             : GLOBAL_STATS["failure_rate"],
+        "avg_retry_count"          : GLOBAL_STATS["avg_retry_count"],
+        "avg_failures_last_7_runs" : GLOBAL_STATS["avg_failures_last_7_runs"],
+        "top_failure_types"        : list(GLOBAL_STATS["top_failure_types"].keys())[:3],
     }
 
 
 # ---------------------------------------------------------------------------
-# OpenAI integration
+# Gemini call with multi-turn support
 # ---------------------------------------------------------------------------
 
-def _call_gemini(prompt: str) -> str:
-    if openai_client is None:
-        return "OpenAI not configured. Set OPENAI_API_KEY."
+def _call_gemini(prompt: str, chat_history: list = []) -> str:
+    """Call Gemini with full conversation history for multi-turn support."""
+    if client is None:
+        return "Gemini API key not configured. Set GEMINI_API_KEY environment variable."
     try:
-        response = openai_client.chat.completions.create(
-            model="gpt-3.5-turbo",
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=500,
-        )
-        return response.choices[0].message.content.strip()
+        # Build history for multi-turn conversation
+        history = []
+        for turn in chat_history:
+            role    = turn.get("role", "")
+            content = turn.get("content", "")
+            if role == "user":
+                history.append(types.Content(role="user",  parts=[types.Part(text=content)]))
+            elif role == "assistant":
+                history.append(types.Content(role="model", parts=[types.Part(text=content)]))
+
+        # Add current prompt
+        history.append(types.Content(role="user", parts=[types.Part(text=prompt)]))
+
+        # Retry up to 3 times on 503 overload
+        for attempt in range(3):
+            try:
+                response = client.models.generate_content(
+                    model="gemini-2.5-flash",
+                    contents=history,
+                )
+                return response.text.strip()
+            except Exception as e:
+                if "503" in str(e) and attempt < 2:
+                    import time
+                    logger.warning("Gemini 503 — retrying in 3s (attempt %d/3)", attempt+1)
+                    time.sleep(3)
+                else:
+                    raise e
+
     except Exception as e:
-        logger.error("OpenAI error: %s", e)
-        return f"OpenAI error: {str(e)}"
+        logger.error("Gemini error: %s", e)
+        return f"Gemini error: {str(e)}"
+
+
+# ---------------------------------------------------------------------------
+# Prompt builder
+# ---------------------------------------------------------------------------
 
 def _build_prompt(
-    pipeline_features: dict,
-    failure_prob: float,
-    day_stats: dict,
-    hour_stats: dict,
-    similar_runs: list,
-    top_failure_type: str,
-    global_ctx: dict,
+    pipeline_features : dict,
+    failure_prob      : float,
+    day_stats         : dict,
+    hour_stats        : dict,
+    similar_runs      : list,
+    top_failure_type  : str,
+    global_ctx        : dict,
+    user_message      : str,
 ) -> str:
-    """Build structured prompt for Gemini."""
+    """Build a context-rich prompt grounded in 149K training data."""
+
     similar_fail_count = sum(1 for r in similar_runs if r["failed"] == 1)
+    risk_level = "HIGH" if failure_prob > 0.75 else "MEDIUM" if failure_prob > 0.4 else "LOW"
 
-    prompt = f"""You are an MLOps expert analyzing a CI/CD pipeline failure prediction.
+    prompt = f"""You are Kairos Pulse, an expert CI/CD reliability engineer and MLOps assistant.
+You have access to historical data from 149,000 real pipeline runs to ground your answers.
 
-PIPELINE CONTEXT:
-- Failure probability: {failure_prob:.1%}
-- Risk level: {"HIGH" if failure_prob > 0.75 else "MEDIUM" if failure_prob > 0.4 else "LOW"}
-- Day of week failure rate: {day_stats.get('failure_rate', 'N/A')}
-- Hour of day failure rate: {hour_stats.get('failure_rate', 'N/A')}
-- Similar historical runs: {len(similar_runs)} found, {similar_fail_count} failed
-- Most common failure type in similar runs: {top_failure_type}
-- Global failure rate: {global_ctx['failure_rate']}
-- Key features: retry_count={pipeline_features.get('retry_count', 0)}, failures_last_7_runs={pipeline_features.get('failures_last_7_runs', 0)}, duration_deviation={pipeline_features.get('duration_deviation', 0):.2f}
+═══ LIVE PIPELINE CONTEXT ═══
+- Pipeline        : {pipeline_features.get('pipeline_name', 'unknown')}
+- Repo            : {pipeline_features.get('repo', 'unknown')}
+- Branch          : {pipeline_features.get('head_branch', 'unknown')}
+- Failure Prob    : {failure_prob:.1%}
+- Risk Level      : {risk_level}
+- Failure Rate    : {pipeline_features.get('workflow_failure_rate', 0):.1%}
+- Failures last 7 : {pipeline_features.get('failures_last_7_runs', 0)}
+- Prev run status : {str(pipeline_features.get('prev_run_status', 'unknown')).upper()}
+- Retry count     : {pipeline_features.get('retry_count', 0)}
+- Concurrent runs : {pipeline_features.get('concurrent_runs', 1)}
 
-Based on this context, provide exactly 3 sections:
+═══ HISTORICAL PATTERNS (from 149K training runs) ═══
+- Global failure rate          : {global_ctx['failure_rate']}
+- Avg retry count (global)     : {global_ctx['avg_retry_count']}
+- Avg failures last 7 (global) : {global_ctx['avg_failures_last_7_runs']}
+- Top failure types globally   : {', '.join(global_ctx['top_failure_types'])}
+- Day-of-week failure rate     : {day_stats.get('failure_rate', 'N/A')}
+- Hour-of-day failure rate     : {hour_stats.get('failure_rate', 'N/A')}
+- Similar historical runs found: {len(similar_runs)} (of which {similar_fail_count} failed)
+- Most common failure type     : {top_failure_type}
 
-1. WHY: In 2-3 sentences, explain WHY this pipeline is likely to fail.
-2. FIX: In 2-3 bullet points, provide specific actionable fixes.
-3. CODE: Provide one short bash or yaml code snippet that would help address the issue.
+═══ USER QUESTION ═══
+{user_message}
 
-Be specific and practical. Focus on the most likely failure type: {top_failure_type}."""
+Answer conversationally like a senior engineer talking to a teammate.
+Use markdown bold for key terms. Be specific and practical.
+If risk is HIGH, always end with a clear one-line action recommendation.
+Keep answer under 150 words unless a detailed breakdown is explicitly asked for."""
 
     return prompt
 
@@ -195,34 +256,32 @@ Be specific and practical. Focus on the most likely failure type: {top_failure_t
 # Main RAG function
 # ---------------------------------------------------------------------------
 
-def get_diagnosis(pipeline_features: dict, failure_prob: float) -> dict:
+def get_diagnosis(
+    pipeline_features : dict,
+    failure_prob      : float,
+    user_message      : str  = "Give me a full diagnosis of this pipeline run.",
+    chat_history      : list = [],
+) -> str:
     """
-    Full RAG diagnosis for a pipeline run.
+    Full RAG diagnosis for a pipeline run. Answers any user question
+    grounded in 149K historical runs via FAISS similarity search.
 
     Parameters
     ----------
-    pipeline_features : dict of feature name -> value
-    failure_prob      : float, predicted failure probability (0-1)
+    pipeline_features : dict  — live run feature values
+    failure_prob      : float — predicted failure probability
+    user_message      : str   — what the user typed in the chatbot
+    chat_history      : list  — previous turns [{"role":"user","content":"..."}]
 
     Returns
     -------
-    dict with:
-        - risk_score
-        - risk_level
-        - day_pattern
-        - hour_pattern
-        - similar_runs_count
-        - similar_runs_failed
-        - top_failure_type
-        - gemini_why
-        - gemini_fix
-        - gemini_code
-        - full_gemini_response
+    str — Gemini's answer, ready to display in chat bubble
     """
-    logger.info("Running RAG diagnosis (prob=%.4f)...", failure_prob)
+    logger.info("Running RAG diagnosis (prob=%.4f, question='%s')...",
+                failure_prob, user_message[:60])
 
-    day   = int(pipeline_features.get("day_of_week", 0))
-    hour  = int(pipeline_features.get("hour", 12))
+    day  = int(pipeline_features.get("day_of_week", 0))
+    hour = int(pipeline_features.get("hour", 12))
 
     day_stats    = get_day_stats(day)
     hour_stats   = get_hour_stats(hour)
@@ -230,49 +289,16 @@ def get_diagnosis(pipeline_features: dict, failure_prob: float) -> dict:
     top_ft       = get_top_failure_type(similar_runs)
     global_ctx   = get_global_context()
 
-    prompt   = _build_prompt(
+    prompt = _build_prompt(
         pipeline_features, failure_prob,
         day_stats, hour_stats,
-        similar_runs, top_ft, global_ctx
+        similar_runs, top_ft, global_ctx,
+        user_message,
     )
-    gemini_response = _call_gemini(prompt)
 
-    # Parse Gemini response into sections
-    why_text  = ""
-    fix_text  = ""
-    code_text = ""
-    lines = gemini_response.split("\n")
-    current = None
-    for line in lines:
-        if line.startswith("1. WHY") or line.startswith("WHY"):
-            current = "why"
-        elif line.startswith("2. FIX") or line.startswith("FIX"):
-            current = "fix"
-        elif line.startswith("3. CODE") or line.startswith("CODE"):
-            current = "code"
-        elif current == "why":
-            why_text += line + " "
-        elif current == "fix":
-            fix_text += line + " "
-        elif current == "code":
-            code_text += line + "\n"
-
-    result = {
-        "risk_score"          : round(failure_prob, 4),
-        "risk_level"          : "HIGH" if failure_prob > 0.75 else "MEDIUM" if failure_prob > 0.4 else "LOW",
-        "day_pattern"         : day_stats,
-        "hour_pattern"        : hour_stats,
-        "similar_runs_count"  : len(similar_runs),
-        "similar_runs_failed" : sum(1 for r in similar_runs if r["failed"] == 1),
-        "top_failure_type"    : top_ft,
-        "gemini_why"          : why_text.strip() or gemini_response,
-        "gemini_fix"          : fix_text.strip(),
-        "gemini_code"         : code_text.strip(),
-        "full_gemini_response": gemini_response,
-    }
-
-    logger.info("Diagnosis complete. Risk: %s | Top failure: %s", result["risk_level"], top_ft)
-    return result
+    response = _call_gemini(prompt, chat_history=chat_history)
+    logger.info("Diagnosis complete.")
+    return response
 
 
 # ---------------------------------------------------------------------------
@@ -280,6 +306,9 @@ def get_diagnosis(pipeline_features: dict, failure_prob: float) -> dict:
 # ---------------------------------------------------------------------------
 if __name__ == "__main__":
     test_features = {
+        "pipeline_name"        : "deploy-staging",
+        "repo"                 : "ClickHouse/ClickHouse",
+        "head_branch"          : "backport/23.8",
         "day_of_week"          : 0,
         "hour"                 : 14,
         "retry_count"          : 3,
@@ -290,16 +319,26 @@ if __name__ == "__main__":
         "total_jobs"           : 12,
         "failed_jobs"          : 5,
         "duration_seconds"     : 450,
+        "prev_run_status"      : "failure",
     }
 
-    result = get_diagnosis(test_features, failure_prob=0.85)
+    questions = [
+        "Give me a full diagnosis.",
+        "How do I fix it?",
+        "Is it safe to run?",
+        "What is the biggest red flag here?",
+    ]
 
+    history = []
     print("\n" + "="*60)
-    print("RAG DIAGNOSIS RESULT")
+    print("RAG CHATBOT TEST — multi-turn")
     print("="*60)
-    print(f"Risk Score : {result['risk_score']}")
-    print(f"Risk Level : {result['risk_level']}")
-    print(f"Top Failure: {result['top_failure_type']}")
-    print(f"Similar Runs: {result['similar_runs_count']} ({result['similar_runs_failed']} failed)")
-    print(f"\nGemini Response:\n{result['full_gemini_response']}")
+
+    for q in questions:
+        print(f"\nUser: {q}")
+        answer = get_diagnosis(test_features, 0.85, user_message=q, chat_history=history)
+        print(f"Bot : {answer}")
+        history.append({"role": "user",      "content": q})
+        history.append({"role": "assistant", "content": answer})
+
     print("="*60)
