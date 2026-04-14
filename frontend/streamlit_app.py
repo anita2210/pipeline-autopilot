@@ -56,32 +56,33 @@ section.main                       { background: #ffffff !important; }
 /* ── NAV ── */
 .kp-nav {
     width: 100%; background: #ffffff;
-    border-bottom: 2px solid #2563eb;
-    padding: 0 56px; display: flex; align-items: center;
+    border-bottom: 1px solid #e5e7eb;
+    padding: 0 48px; display: flex; align-items: center;
     justify-content: space-between;
-    height: 62px; position: fixed; top: 0; left: 0; right: 0;
+    height: 64px; position: fixed; top: 0; left: 0; right: 0;
     z-index: 9999; box-sizing: border-box;
-    box-shadow: 0 1px 8px rgba(37,99,235,0.08);
+    box-shadow: 0 1px 0 rgba(0,0,0,0.06);
 }
-.kp-nav-left   { display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.kp-nav-left   { display: flex; align-items: center; gap: 10px; flex-shrink: 0; margin-right: 40px; }
 .kp-nav-left img { height: 34px; width: auto; object-fit: contain; }
 .kp-nav-brand  { font-size: 1.08rem; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; }
 .kp-nav-brand span { color: #2563eb; }
-.kp-nav-links  { display: flex; align-items: center; gap: 2px; }
+.kp-nav-links  { display: flex; align-items: center; gap: 4px; }
 .kp-nav-link {
-    font-size: 0.85rem; font-weight: 500; color: #64748b;
-    padding: 7px 15px; border-radius: 6px; cursor: pointer;
+    font-size: 0.875rem; font-weight: 500; color: #374151;
+    padding: 8px 16px; border-radius: 6px; cursor: pointer;
     text-decoration: none; white-space: nowrap; border: none;
     background: transparent; transition: all 0.15s; display: inline-block;
+    letter-spacing: -0.1px; user-select: none;
 }
-.kp-nav-link:hover  { background: #eff6ff; color: #2563eb; }
-.kp-nav-link.active { background: #2563eb; color: #ffffff; font-weight: 600; }
+.kp-nav-link:hover  { background: #f3f4f6; color: #111827; }
+.kp-nav-link.active { background: #eff6ff; color: #2563eb; font-weight: 600; border: 1px solid #bfdbfe; }
 .kp-nav-link .badge {
     display: inline-block; background: #fee2e2; color: #991b1b;
     font-size: 0.62rem; font-weight: 700; padding: 1px 5px;
     border-radius: 10px; margin-left: 4px; vertical-align: middle;
 }
-.kp-content { margin-top: 62px; }
+.kp-content { margin-top: 64px; }
 
 /* ── HERO ── */
 .kp-hero {
@@ -138,7 +139,7 @@ section.main                       { background: #ffffff !important; }
 .kp-page-header p  { font-size: 0.82rem; color: #93c5fd; margin: 0; }
 
 /* ── INNER CONTENT ── */
-.kp-inner { padding: 28px 56px; background: #ffffff; }
+.kp-inner { padding: 32px 48px 40px; background: #ffffff; margin: 0 1ch; }
 
 /* ── CARDS ── */
 .kp-card {
@@ -528,7 +529,8 @@ active_alerts = len([a for a in st.session_state.alerts if not a.get("resolved")
 def nav_link(label, target, badge=None):
     active_class = "active" if page==target else ""
     badge_html = f'<span class="badge">{badge}</span>' if badge else ""
-    return f'<a class="kp-nav-link {active_class}" href="?page={target}">{label}{badge_html}</a>'
+    escaped = target.replace(" ", "%20")
+    return f'<a class="kp-nav-link {active_class}" href="?page={escaped}" target="_self" onclick="event.preventDefault();window.parent.location.href=window.parent.location.pathname+\'?page={escaped}\';">{label}{badge_html}</a>'
 
 incidents_badge = active_alerts if active_alerts>0 else None
 monitor_badge   = f"{high_count} high" if high_count>0 else None
@@ -721,35 +723,6 @@ elif page=="Pipeline Monitor":
             last_ts=q[-1].get("_queued_at","—") if q else "—"
             st.markdown(f'<div class="metric-tile"><div class="val" style="font-size:1.3rem;">{last_ts}</div><div class="lbl">Last Arrived</div></div>',unsafe_allow_html=True)
 
-        st.markdown("<br>",unsafe_allow_html=True)
-        b1,b2,_=st.columns([2,2,4])
-        with b1: score_all=st.button("Score All Runs",type="primary",use_container_width=True)
-        with b2: refresh=st.button("Refresh Queue",use_container_width=True)
-        if refresh: st.rerun()
-
-        if score_all:
-            bar=st.progress(0,text="Scoring runs…"); fired=[]
-            for i,run in enumerate(st.session_state.queue):
-                if not run.get("_scored"):
-                    prob,shap,live=call_api(run)
-                    run["_probability"]=prob; run["_risk"]=risk_label(prob)
-                    run["_scored"]=True; run["_shap"]=shap; run["_live_api"]=live
-                    if run["_risk"]=="HIGH" and not run.get("_alert_sent"):
-                        fixes=get_fix_suggestions(run,prob); run["_fix_steps"]=fixes
-                        sent=send_gmail_alert(run,prob,fixes); run["_alert_sent"]=sent
-                        fired.append(run["pipeline_name"])
-                        st.session_state.alerts.insert(0,{
-                            "timestamp":datetime.now(),"pipeline":run["pipeline_name"],
-                            "repo":run["repo"],"probability":prob,"risk_level":"HIGH",
-                            "action":"HELD","actual_outcome":"PENDING","correct":1,
-                            "compute_saved_min":round(random.uniform(4,18),1),
-                            "resolved":False,"email_sent":sent})
-                bar.progress((i+1)/len(st.session_state.queue),text=f"Scoring {i+1}/{len(st.session_state.queue)}…")
-                time.sleep(0.05)
-            bar.empty()
-            if fired: st.toast(f"Alert sent for: {', '.join(fired)}")
-            st.rerun()
-
         high_runs=[r for r in q if r.get("_risk")=="HIGH"]
         if high_runs:
             st.markdown("---")
@@ -780,16 +753,13 @@ elif page=="Pipeline Monitor":
                 </div>''', unsafe_allow_html=True)
 
         # ── LIVE GITHUB ACTIONS STREAM ──
-        st.markdown("---")
-        st.markdown("### Live GitHub Actions Stream")
-        st.caption("Polls GitHub Actions API every 30s via FastAPI SSE endpoint — real runs from monitored repos")
+        st.markdown("<div style='height:20px'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='border-top:1px solid #e2e8f0; padding-top:28px; margin-bottom:20px; text-align:center;'><span style='font-size:1.1rem;font-weight:700;color:#0f172a;letter-spacing:-0.2px;'>Live GitHub Actions Stream</span></div>", unsafe_allow_html=True)
 
-        lc1, lc2 = st.columns([2, 4])
-        with lc1:
+        col_l, col_c, col_r = st.columns([3, 2, 3])
+        with col_c:
             start_stream = st.button("Start Live Stream", type="primary", use_container_width=True)
-        with lc2:
-            if st.session_state.live_events:
-                st.caption(f"Showing {len(st.session_state.live_events)} events from last stream session")
+        st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
         DEMO_STREAM_RUNS = [
             {"run_id":"run_82341","pipeline_name":"build-and-test",    "repo":"ClickHouse/ClickHouse",      "head_branch":"main",             "trigger_type":"push",             "workflow_failure_rate":0.08,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":3},
