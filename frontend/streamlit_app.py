@@ -615,13 +615,12 @@ if page=="Overview":
       <div class="kp-h2">Everything your DevOps team needs</div>
       <div class="kp-p">Kairos Pulse sits upstream of your CI/CD executor — scoring every run before it starts so your team fixes issues before they cost compute time.</div>
       <div class="kp-grid-3">
-        <div class="kp-feat-card"><div class="kp-feat-title">XGBoost Prediction Engine</div><div class="kp-feat-desc">Trained on 149,967 real GitHub Actions runs. Classifies each incoming run as High, Medium, or Low risk before execution begins.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">SHAP Feature Explainability</div><div class="kp-feat-desc">Every prediction comes with a SHAP waterfall showing which signals drove the score — workflow failure rate, retry count, concurrent runs, and more.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">Gemini RAG Chatbot</div><div class="kp-feat-desc">Ask any question about a flagged pipeline. The AI pulls from historical run data and returns root cause analysis with concrete fix steps.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">Live GitHub Actions Stream</div><div class="kp-feat-desc">Real-time SSE stream polls GitHub Actions API every 30 seconds across monitored repos — predictions appear as runs complete.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">MLflow Experiment Tracking</div><div class="kp-feat-desc">Every training run is logged to MLflow — hyperparameters, AUC, F1, confusion matrix. Best model is auto-registered to Production stage.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">Evidently Drift Detection</div><div class="kp-feat-desc">Feature distributions are monitored continuously. When drift exceeds the threshold, an Airflow retrain is triggered automatically via REST API.</div></div>
-      </div>
+       <div class="kp-feat-card"><div class="kp-feat-title">Catch failures before they happen</div><div class="kp-feat-desc">Score every pipeline run before it executes. Kairos Pulse flags high-risk runs automatically — so your team fixes the problem, not the fallout.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Know exactly why a run will fail</div><div class="kp-feat-desc">Every prediction comes with a plain-English breakdown of the top signals driving the risk — no black box, no guessing.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Get a fix, not just a warning</div><div class="kp-feat-desc">Ask Kairos Pulse what went wrong and it tells you what to do next — with step-by-step remediation based on your pipeline's history.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Real-time coverage across all your repos</div><div class="kp-feat-desc">Monitor every active repository continuously. Risk scores appear the moment a run is queued — no configuration required.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Models that stay accurate over time</div><div class="kp-feat-desc">Kairos Pulse retrains automatically when your pipelines evolve. Your predictions are always backed by the freshest data.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Zero blind spots</div><div class="kp-feat-desc">When your pipeline behavior shifts, Kairos Pulse notices first — and triggers retraining before accuracy degrades.</div></div>  </div>
     </div>
     <div class="kp-footer"><span>Google Cambridge Showcase · April 15, 2026 · github.com/anita2210/pipeline-autopilot</span></div>
     ''', unsafe_allow_html=True)
