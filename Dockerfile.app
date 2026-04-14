@@ -11,7 +11,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir \
     fastapi uvicorn[standard] \
     scikit-learn xgboost shap \
-    pandas numpy joblib pydantic \
+    pandas numpy==1.26.4 joblib pydantic \
     faiss-cpu==1.7.4 \
     langchain langchain-community \
     google-genai
