@@ -44,7 +44,7 @@ html, body, [class*="css"], [class*="st-"], .stApp {
 section[data-testid="stSidebar"] { display:none !important; }
 header[data-testid="stHeader"]   { display:none !important; }
 .main > div { padding: 0 !important; }
-.block-container { padding: 0 !important; margin: 0 !important; max-width: 100% !important; width: 100% !important; }
+.block-container { padding: 0 60px !important; margin: 0 !important; max-width: 100% !important; width: 100% !important; }
 #root > div:first-child { padding-top: 0 !important; }
 .stApp { background-color: #ffffff !important; }
 
@@ -87,16 +87,17 @@ section.main                       { background: #ffffff !important; }
 /* ── HERO ── */
 .kp-hero {
     background: linear-gradient(160deg, #f8faff 0%, #eff6ff 40%, #dbeafe 100%);
-    padding: 88px 80px 76px; text-align: center;
-    border-bottom: 1px solid #dbeafe; width: 100%; box-sizing: border-box;
-    position: relative; overflow: hidden;
+    padding: 48px 80px 36px; text-align: center;
+    border-bottom: 1px solid #dbeafe;
+    width: calc(100% + 120px); margin-left: -60px; margin-right: -60px;
+    box-sizing: border-box; position: relative; overflow: hidden;
 }
 .kp-hero-logo-row  { display:flex; align-items:center; justify-content:center; gap:18px; margin-bottom:18px; position:relative; z-index:1; }
 .kp-hero-logo-row img { height: 68px; width: auto; }
 .kp-hero-wordmark  { font-size: 3rem; font-weight: 800; color: #0f172a; letter-spacing: -1.5px; line-height: 1; position:relative; z-index:1; }
 .kp-hero-wordmark span { color: #2563eb; }
 .kp-hero-tagline   { font-size: 1.1rem; color: #475569; margin: 14px auto 5px; max-width: 480px; line-height: 1.6; position:relative; z-index:1; }
-.kp-hero-sub       { font-size: 0.78rem; font-weight: 700; color: #2563eb; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 80px; position:relative; z-index:1; }
+.kp-hero-sub       { font-size: 0.72rem; font-weight: 700; color: #2563eb; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 26px; position:relative; z-index:1; }
 .kp-hero-cards     { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; max-width: 880px; margin: 0 auto; position:relative; z-index:1; }
 .kp-hero-card      { background: #ffffff; border: 1px solid #dbeafe; border-radius: 10px; padding: 20px 18px; text-align: left; box-shadow: 0 1px 4px rgba(37,99,235,0.06); }
 .kp-hero-card-tag  { display:inline-block; font-size:0.66rem; font-weight:700; background:#dbeafe; color:#1d4ed8; border-radius:4px; padding:2px 7px; margin-bottom:9px; text-transform:uppercase; letter-spacing:0.5px; }
@@ -104,15 +105,15 @@ section.main                       { background: #ffffff !important; }
 .kp-hero-card-desc { font-size: 0.78rem; color: #64748b; line-height: 1.55; }
 
 /* ── STATS BAND ── */
-.kp-stats { background: #1e3a8a; padding: 44px 80px; display: grid; grid-template-columns: repeat(4,1fr); text-align: center; width: 100%; box-sizing: border-box; }
+.kp-stats { background: #1e3a8a; padding: 22px 80px; display: grid; grid-template-columns: repeat(4,1fr); text-align: center; width: calc(100% + 120px); margin-left: -60px; margin-right: -60px; box-sizing: border-box; }
 .kp-stat  { border-right: 1px solid rgba(255,255,255,0.1); padding: 0 20px; }
 .kp-stat:last-child { border-right: none; }
 .kp-stat-num { font-size: 2.2rem; font-weight: 800; color: #ffffff; letter-spacing: -1px; margin-bottom: 4px; }
 .kp-stat-lbl { font-size: 0.7rem; color: #93c5fd; text-transform: uppercase; letter-spacing: 0.8px; }
 
 /* ── SECTIONS ── */
-.kp-section     { padding: 64px 80px; background: #ffffff; width: 100%; box-sizing: border-box; }
-.kp-section-alt { padding: 64px 80px; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; width: 100%; box-sizing: border-box; }
+.kp-section     { padding: 36px 80px; background: #ffffff; width: calc(100% + 120px); margin-left: -60px; margin-right: -60px; box-sizing: border-box; }
+.kp-section-alt { padding: 36px 80px; background: #f8fafc; border-top: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0; width: calc(100% + 120px); margin-left: -60px; margin-right: -60px; box-sizing: border-box; }
 .kp-eyebrow { font-size: 0.72rem; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 8px; }
 .kp-h2      { font-size: 1.9rem; font-weight: 700; color: #0f172a; letter-spacing: -0.5px; margin-bottom: 8px; }
 .kp-p       { font-size: 0.92rem; color: #64748b; max-width: 480px; line-height: 1.7; margin-bottom: 40px; }
@@ -130,8 +131,9 @@ section.main                       { background: #ffffff !important; }
 /* ── PAGE HEADER (inner pages) ── */
 .kp-page-header {
     background: #1e3a8a;
-    padding: 28px 56px 24px; width: 100%; box-sizing: border-box;
-    border-bottom: 3px solid #2563eb;
+    padding: 20px 80px 16px; width: calc(100% + 120px);
+    margin-left: -60px; margin-right: -60px;
+    box-sizing: border-box; border-bottom: 3px solid #2563eb;
 }
 .kp-page-header p, .kp-page-header div, .kp-page-header span { color: #93c5fd !important; }
 .kp-breadcrumb { font-size: 0.66rem; color: #93c5fd !important; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; }
@@ -139,7 +141,7 @@ section.main                       { background: #ffffff !important; }
 .kp-page-header p  { font-size: 0.82rem; color: #93c5fd; margin: 0; }
 
 /* ── INNER CONTENT ── */
-.kp-inner { padding: 32px 48px 40px; background: #ffffff; margin: 0 1ch; }
+.kp-inner { padding: 24px 0 32px; background: #ffffff; }
 
 /* ── CARDS ── */
 .kp-card {
@@ -189,6 +191,14 @@ div[data-testid="stButton"] button {
     padding: 8px 18px !important;
     transition: all 0.15s ease !important;
     cursor: pointer !important;
+}
+/* RCA quick question buttons */
+.rca-qq-wrap div[data-testid="stButton"] button {
+    background: #eff6ff !important; border: 1.5px solid #2563eb !important;
+    color: #1d4ed8 !important; font-weight: 600 !important;
+}
+.rca-qq-wrap div[data-testid="stButton"] button:hover {
+    background: #2563eb !important; color: #ffffff !important;
 }
 div[data-testid="stButton"] button[kind="primary"],
 div[data-testid="stButton"] button[kind="primary"] p,
@@ -250,9 +260,26 @@ div[data-testid="stAlert"] { border-radius: 8px !important; }
 
 /* Dataframe */
 [data-testid="stDataFrame"] { background: #ffffff !important; border-radius: 10px; border: 1px solid #e2e8f0; }
+/* Chat input */
+[data-testid="stChatInput"] { border: 2px solid #2563eb !important; border-radius: 10px !important; box-shadow: 0 0 0 3px rgba(37,99,235,0.08) !important; }
+[data-testid="stChatInput"] > div { border: none !important; }
 
+
+/* ── RCA PAGE STYLES ── */
+.rca-run-card {
+    background: #f8faff; border: 1.5px solid #bfdbfe; border-radius: 12px;
+    padding: 18px 22px; margin: 10px 0 14px;
+    display: flex; align-items: center; justify-content: space-between; gap: 20px;
+}
+.rca-run-id   { font-family: 'JetBrains Mono', monospace; font-size: 0.76rem; color: #64748b; margin-bottom: 3px; }
+.rca-run-name { font-size: 1.1rem; font-weight: 700; color: #0f172a; letter-spacing: -0.3px; margin-bottom: 5px; }
+.rca-run-meta { font-size: 0.79rem; color: #64748b; }
+.rca-run-meta span { color: #0f172a; font-weight: 500; }
+.rca-risk-prob { font-size: 2.1rem; font-weight: 800; letter-spacing: -1px; line-height: 1; }
+.rca-risk-lbl  { font-size: 0.63rem; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.8px; margin-top: 3px; }
+.rca-section-label { font-size: 0.72rem; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 1.4px; margin-bottom: 10px; margin-top: 20px; }
 /* ── FOOTER ── */
-.kp-footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 18px 80px; text-align: center; }
+.kp-footer { background: #f8fafc; border-top: 1px solid #e2e8f0; padding: 12px 80px; text-align: center; width: calc(100% + 120px); margin-left: -60px; margin-right: -60px; box-sizing: border-box; }
 .kp-footer span { font-size: 0.76rem; color: #94a3b8; }
 </style>
 """, unsafe_allow_html=True)
@@ -1042,18 +1069,29 @@ elif page=="Root Cause Analysis":
         run_opts={f"{r['run_id']} — {r['pipeline_name']} ({r.get('_risk','—')} · {r.get('_probability',0):.0%})":i
                   for i,r in enumerate(st.session_state.queue)
                   if r.get("_scored")}
-        chosen_label=st.selectbox("Select run",list(run_opts.keys()))
-        chosen_idx=run_opts[chosen_label]; active_run=st.session_state.queue[chosen_idx]
-        if st.session_state.sel_idx!=chosen_idx:
-            st.session_state.sel_idx=chosen_idx; st.session_state.chat=[]
+        chosen_idx=list(run_opts.values())[0] if run_opts else 0
+        if st.session_state.sel_idx is not None and st.session_state.sel_idx in run_opts.values():
+            chosen_idx=st.session_state.sel_idx
+        active_run=st.session_state.queue[chosen_idx]
+        st.markdown('<p style="font-size:0.72rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:1.4px;margin:0 0 10px;">Analysing Run</p>', unsafe_allow_html=True)
         prob=active_run.get("_probability",0.5); risk=active_run.get("_risk","MEDIUM")
-        st.markdown(f'''<div class="run-context-pill">
-            <strong>{active_run['pipeline_name']}</strong> &nbsp;·&nbsp; {active_run['repo']}
-            &nbsp;·&nbsp; branch: <span class="mono">{active_run['head_branch']}</span>
-            &nbsp;·&nbsp; probability: <strong>{prob:.0%}</strong>
-            &nbsp;·&nbsp; <span class="badge-{risk.lower()}">{risk}</span>
+        rc={"HIGH":"#dc2626","MEDIUM":"#d97706","LOW":"#16a34a"}.get(risk,"#6b7280")
+        rb={"HIGH":"#fff1f2","MEDIUM":"#fffbeb","LOW":"#f0fdf4"}.get(risk,"#f8fafc")
+        st.markdown(f'''
+        <div class="rca-run-card">
+          <div>
+            <div class="rca-run-id">{active_run["run_id"]} &nbsp;·&nbsp; {active_run["repo"]}</div>
+            <div class="rca-run-name">{active_run["pipeline_name"]}</div>
+            <div class="rca-run-meta">Branch: <span>{active_run["head_branch"]}</span> &nbsp;·&nbsp; Trigger: <span>{active_run.get("trigger_type","—")}</span> &nbsp;·&nbsp; Fail rate: <span>{active_run.get("workflow_failure_rate",0):.0%}</span></div>
+          </div>
+          <div style="text-align:center;min-width:80px;">
+            <div class="rca-risk-prob" style="color:{rc};">{prob:.0%}</div>
+            <div style="background:{rb};color:{rc};border:1px solid {rc}44;border-radius:6px;padding:2px 12px;font-size:0.7rem;font-weight:700;margin-top:4px;display:inline-block;">{risk}</div>
+            <div class="rca-risk-lbl">Failure Risk</div>
+          </div>
         </div>''', unsafe_allow_html=True)
-        st.markdown("**Quick questions:**")
+        st.markdown('<div class="rca-section-label">Quick Diagnosis</div>', unsafe_allow_html=True)
+        st.markdown('<div class="rca-qq-wrap">', unsafe_allow_html=True)
         btn_cols=st.columns(4)
         quick_qs=["Why is this failing?","How do I fix it?","Is it safe to run?","Top risk signals?"]
         for i,q_text in enumerate(quick_qs):
@@ -1062,8 +1100,9 @@ elif page=="Root Cause Analysis":
                     st.session_state.chat.append({"role":"user","content":q_text})
                     with st.spinner("Analyzing…"): time.sleep(0.5); ans=rag_chat_response(q_text,active_run,prob)
                     st.session_state.chat.append({"role":"assistant","content":ans}); st.rerun()
-        st.markdown("<br>",unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
         if st.session_state.chat:
+            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
             st.markdown('<div class="chat-container">',unsafe_allow_html=True)
             for msg in st.session_state.chat:
                 if msg["role"]=="user":
@@ -1073,14 +1112,6 @@ elif page=="Root Cause Analysis":
                     st.markdown(msg["content"])
                     st.markdown('</div>',unsafe_allow_html=True)
             st.markdown('</div>',unsafe_allow_html=True)
-        else:
-            st.caption("Use the quick buttons above or type a question below.")
-        user_in=st.chat_input(f"Ask about {active_run['pipeline_name']}…")
-        if user_in:
-            st.session_state.chat.append({"role":"user","content":user_in})
-            with st.spinner("Thinking…"): time.sleep(0.4); ans=rag_chat_response(user_in,active_run,prob)
-            st.session_state.chat.append({"role":"assistant","content":ans}); st.rerun()
-        if st.session_state.chat:
             col_clear,col_diag=st.columns([1,5])
             with col_diag:
                 if st.button("Full auto-diagnosis"):
@@ -1089,6 +1120,11 @@ elif page=="Root Cause Analysis":
                     st.session_state.chat.append({"role":"assistant","content":full}); st.rerun()
             with col_clear:
                 if st.button("Clear"): st.session_state.chat=[]; st.rerun()
+        user_in=st.chat_input(f"Ask about {active_run['pipeline_name']}…")
+        if user_in:
+            st.session_state.chat.append({"role":"user","content":user_in})
+            with st.spinner("Thinking…"): time.sleep(0.4); ans=rag_chat_response(user_in,active_run,prob)
+            st.session_state.chat.append({"role":"assistant","content":ans}); st.rerun()
     st.markdown('</div>', unsafe_allow_html=True)
 
 # ══════════════════════════════════════════════
