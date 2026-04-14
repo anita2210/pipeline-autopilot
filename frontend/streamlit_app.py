@@ -178,7 +178,7 @@ hr { border: none; border-top: 1px solid #e2e8f0; margin: 20px 0; }
 /* ── CHAT ── */
 .chat-user { background: #dbeafe; border-radius: 16px 16px 4px 16px; padding: 10px 14px; margin: 6px 0 6px auto; max-width: 76%; font-size: 0.86rem; color: #1e3a8a; line-height: 1.5; }
 .chat-bot  { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 16px 16px 16px 4px; padding: 10px 14px; margin: 6px 0; max-width: 86%; font-size: 0.86rem; color: #374151; line-height: 1.6; }
-.chat-container { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; min-height: 180px; max-height: 400px; overflow-y: auto; margin-bottom: 12px; }
+.chat-container { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 14px 18px; max-height: 400px; overflow-y: auto; margin-bottom: 12px; }
 .run-context-pill { background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 20px; padding: 5px 12px; font-size: 0.76rem; color: #1e40af; display: inline-block; margin-bottom: 12px; }
 .mono { font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; }
 
@@ -732,7 +732,6 @@ elif page=="Pipeline Monitor":
     st.markdown('''<div class="kp-page-header">
       <div class="kp-breadcrumb">Kairos Pulse / Pipeline Monitor</div>
       <div style="font-size:1.5rem;font-weight:700;color:#ffffff;margin:0 0 3px;">Pipeline Monitor</div>
-      <p>Incoming CI/CD runs scored before execution — real GitHub Actions data</p>
     </div>''', unsafe_allow_html=True)
 
     with st.container():
@@ -1032,7 +1031,6 @@ elif page=="Root Cause Analysis":
     st.markdown('''<div class="kp-page-header">
       <div class="kp-breadcrumb">Kairos Pulse / Root Cause Analysis</div>
       <div style="font-size:1.5rem;font-weight:700;color:#ffffff;margin:0 0 3px;">Root Cause Analysis</div>
-      <p>AI-powered diagnosis of high and medium risk runs — Gemini RAG chatbot</p>
     </div>''', unsafe_allow_html=True)
 
     st.markdown('<div class="kp-inner">', unsafe_allow_html=True)
@@ -1073,7 +1071,7 @@ elif page=="Root Cause Analysis":
         if st.session_state.sel_idx is not None and st.session_state.sel_idx in run_opts.values():
             chosen_idx=st.session_state.sel_idx
         active_run=st.session_state.queue[chosen_idx]
-        st.markdown('<p style="font-size:0.72rem;font-weight:800;color:#0f172a;text-transform:uppercase;letter-spacing:1.4px;margin:0 0 10px;">Analysing Run</p>', unsafe_allow_html=True)
+        st.markdown('<p style="font-size:0.72rem;font-weight:900;color:#0f172a;text-transform:uppercase;letter-spacing:1.4px;margin:0 0 10px;">Analysing Run</p>', unsafe_allow_html=True)
         prob=active_run.get("_probability",0.5); risk=active_run.get("_risk","MEDIUM")
         rc={"HIGH":"#dc2626","MEDIUM":"#d97706","LOW":"#16a34a"}.get(risk,"#6b7280")
         rb={"HIGH":"#fff1f2","MEDIUM":"#fffbeb","LOW":"#f0fdf4"}.get(risk,"#f8fafc")
@@ -1102,16 +1100,11 @@ elif page=="Root Cause Analysis":
                     st.session_state.chat.append({"role":"assistant","content":ans}); st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
         if st.session_state.chat:
-            st.markdown("<div style='height:8px'></div>", unsafe_allow_html=True)
-            st.markdown('<div class="chat-container">',unsafe_allow_html=True)
             for msg in st.session_state.chat:
                 if msg["role"]=="user":
                     st.markdown(f'<div class="chat-user">{msg["content"]}</div>',unsafe_allow_html=True)
                 else:
-                    st.markdown('<div class="chat-bot">',unsafe_allow_html=True)
-                    st.markdown(msg["content"])
-                    st.markdown('</div>',unsafe_allow_html=True)
-            st.markdown('</div>',unsafe_allow_html=True)
+                    st.markdown(f'<div class="chat-bot">{msg["content"]}</div>',unsafe_allow_html=True)
             col_clear,col_diag=st.columns([1,5])
             with col_diag:
                 if st.button("Full auto-diagnosis"):
@@ -1134,7 +1127,6 @@ elif page=="Audit Log":
     st.markdown('''<div class="kp-page-header">
       <div class="kp-breadcrumb">Kairos Pulse / Audit Log</div>
       <div style="font-size:1.5rem;font-weight:700;color:#ffffff;margin:0 0 3px;">Audit Log</div>
-      <p>All runs scored in this session — pipeline, risk score, action taken</p>
     </div>''', unsafe_allow_html=True)
 
     st.markdown('<div class="kp-inner">', unsafe_allow_html=True)
@@ -1257,7 +1249,6 @@ elif page=="Incidents":
     st.markdown('''<div class="kp-page-header">
       <div class="kp-breadcrumb">Kairos Pulse / Incidents</div>
       <div style="font-size:1.5rem;font-weight:700;color:#ffffff;margin:0 0 3px;">Incidents</div>
-      <p>High risk runs flagged for intervention — Gmail alerts sent to varupandi@gmail.com</p>
     </div>''', unsafe_allow_html=True)
 
     st.markdown('<div class="kp-inner">', unsafe_allow_html=True)
