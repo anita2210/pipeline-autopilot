@@ -615,15 +615,16 @@ if page=="Overview":
       <div class="kp-h2">Everything your DevOps team needs</div>
       <div class="kp-p">Kairos Pulse sits upstream of your CI/CD executor — scoring every run before it starts so your team fixes issues before they cost compute time.</div>
       <div class="kp-grid-3">
-        <div class="kp-feat-card"><div class="kp-feat-title">XGBoost Prediction Engine</div><div class="kp-feat-desc">Trained on 149,967 real GitHub Actions runs. Classifies each incoming run as High, Medium, or Low risk before execution begins.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">SHAP Feature Explainability</div><div class="kp-feat-desc">Every prediction comes with a SHAP waterfall showing which signals drove the score — workflow failure rate, retry count, concurrent runs, and more.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">Gemini RAG Chatbot</div><div class="kp-feat-desc">Ask any question about a flagged pipeline. The AI pulls from historical run data and returns root cause analysis with concrete fix steps.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">Live GitHub Actions Stream</div><div class="kp-feat-desc">Real-time SSE stream polls GitHub Actions API every 30 seconds across monitored repos — predictions appear as runs complete.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">MLflow Experiment Tracking</div><div class="kp-feat-desc">Every training run is logged to MLflow — hyperparameters, AUC, F1, confusion matrix. Best model is auto-registered to Production stage.</div></div>
-        <div class="kp-feat-card"><div class="kp-feat-title">Evidently Drift Detection</div><div class="kp-feat-desc">Feature distributions are monitored continuously. When drift exceeds the threshold, an Airflow retrain is triggered automatically via REST API.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Catch failures before they happen</div><div class="kp-feat-desc">Score every pipeline run before it executes. Kairos Pulse flags high-risk runs automatically — so your team fixes the problem, not the fallout.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Know exactly why a run will fail</div><div class="kp-feat-desc">Every prediction comes with a plain-English breakdown of the top signals driving the risk — no black box, no guessing.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Get a fix, not just a warning</div><div class="kp-feat-desc">Ask Kairos Pulse what went wrong and it tells you what to do next — with step-by-step remediation based on your pipeline's history.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Real-time coverage across all your repos</div><div class="kp-feat-desc">Monitor every active repository continuously. Risk scores appear the moment a run is queued — no configuration required.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Models that stay accurate over time</div><div class="kp-feat-desc">Kairos Pulse retrains automatically when your pipelines evolve. Your predictions are always backed by the freshest data.</div></div>
+        <div class="kp-feat-card"><div class="kp-feat-title">Zero blind spots</div><div class="kp-feat-desc">When your pipeline behavior shifts, Kairos Pulse notices first — and triggers retraining before accuracy degrades.</div></div>
+      
       </div>
     </div>
-    <div class="kp-footer"><span>Google Cambridge Showcase · April 15, 2026 · github.com/anita2210/pipeline-autopilot</span></div>
+
     ''', unsafe_allow_html=True)
     components.html('''<script>
     (function() {
@@ -879,11 +880,10 @@ elif page=="Pipeline Monitor":
                         "timestamp":datetime.now(),"pipeline":dr["pipeline_name"],
                         "repo":dr["repo"],"probability":prob,"risk_level":"HIGH",
                         "action":"HELD","actual_outcome":"PENDING","correct":1,
-                        "compute_saved_min":round(random.uniform(4,18),1),
                         "resolved":False,"email_sent":True})
                 time.sleep(1.0)
             high_total = sum(1 for e in collected if e.get("risk_level")=="HIGH")
-            status_ph.success(f"Stream complete — {len(collected)} runs scored · {high_total} high risk held · alerts sent to varupandi@gmail.com")
+            status_ph.success(f"Stream complete — {len(collected)} runs scored · {high_total} high risk held · alerts sent to the DevOps Team")
 
         feed_ph   = st.empty()
         status_ph = st.empty()
@@ -1106,11 +1106,11 @@ elif page=="Root Cause Analysis":
                 else:
                     st.markdown(f'<div class="chat-bot">{msg["content"]}</div>',unsafe_allow_html=True)
             col_clear,col_diag=st.columns([1,5])
-            with col_diag:
-                if st.button("Full auto-diagnosis"):
-                    full=rag_chat_response("why and how to fix",active_run,prob)
-                    st.session_state.chat.append({"role":"user","content":"Give me a full diagnosis."})
-                    st.session_state.chat.append({"role":"assistant","content":full}); st.rerun()
+            # with col_diag:
+            #     if st.button("Full auto-diagnosis"):
+            #         full=rag_chat_response("why and how to fix",active_run,prob)
+            #         st.session_state.chat.append({"role":"user","content":"Give me a full diagnosis."})
+            #         st.session_state.chat.append({"role":"assistant","content":full}); st.rerun()
             with col_clear:
                 if st.button("Clear"): st.session_state.chat=[]; st.rerun()
         user_in=st.chat_input(f"Ask about {active_run['pipeline_name']}…")
@@ -1268,7 +1268,7 @@ elif page=="Incidents":
         for i,al in enumerate(active[:10]):
             ts=pd.to_datetime(al["timestamp"]).strftime("%b %d %H:%M")
             prob=al.get("probability",0.82); saved=al.get("compute_saved_min",0)
-            email_note="Alert sent to varupandi@gmail.com" if al.get("email_sent") else "Sending…"
+            email_note="Alert sent to the DevOps Team" if al.get("email_sent") else "Sending…"
             st.markdown(f'''<div class="alert-item">
               <div style="display:flex;align-items:flex-start;justify-content:space-between;">
                 <div>
