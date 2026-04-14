@@ -11,7 +11,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 RUN pip install --no-cache-dir \
     fastapi uvicorn[standard] \
     scikit-learn xgboost shap \
-    pandas numpy joblib pydantic
+    pandas numpy joblib pydantic \
+    faiss-cpu==1.7.4 \
+    langchain langchain-community \
+    google-genai
+
+# Copy knowledge base
+COPY knowledge_base/ knowledge_base/
 
 # Copy model artifacts
 COPY models/trained/best_model.joblib   models/trained/best_model.joblib
