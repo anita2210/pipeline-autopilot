@@ -454,13 +454,14 @@ def send_gmail_alert(run, probability, fix_steps):
 def rag_chat_response(user_message, run, probability):
     """Calls live Cloud Run /explain endpoint (Gemini 2.5 Flash + RAG). Falls back to keyword bot."""
     try:
-        payload = {
-            "pipeline_features": {k: v for k, v in run.items() if not k.startswith("_")},
-            "failure_prob":       float(probability),
-            "user_message":       user_message,
-            "chat_history":       st.session_state.get("chat", []),
-        }
-        r = requests.post(f"{CLOUD_RUN_URL}/explain", json=payload, timeout=10)
+        if False:
+            payload = {
+                "pipeline_features": {k: v for k, v in run.items() if not k.startswith("_")},
+                "failure_prob":       float(probability),
+                "user_message":       user_message,
+                "chat_history":       st.session_state.get("chat", []),
+            }
+            r = requests.post(f"{CLOUD_RUN_URL}/explain", json=payload, timeout=10)
         if r.status_code == 200:
             return r.json().get("diagnosis", "No response from API.")
     except Exception as e:
