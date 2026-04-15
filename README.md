@@ -1,4 +1,4 @@
-# 🚀 Pipeline Autopilot
+# Pipeline Autopilot — Kairos Pulse
 
 **MLOps CI/CD Pipeline Failure Prediction System**
 
@@ -8,67 +8,107 @@
 [![MLflow](https://img.shields.io/badge/MLflow-experiment%20tracking-orange.svg)](https://mlflow.org/)
 [![XGBoost](https://img.shields.io/badge/XGBoost-model-brightgreen.svg)](https://xgboost.readthedocs.io/)
 [![Fairlearn](https://img.shields.io/badge/Fairlearn-bias%20detection-purple.svg)](https://fairlearn.org/)
+[![Cloud Run](https://img.shields.io/badge/GCP-Cloud%20Run-4285F4.svg)](https://cloud.google.com/run)
+[![Gemini](https://img.shields.io/badge/Gemini-RAG-blueviolet.svg)](https://deepmind.google/technologies/gemini/)
 
 ---
 
-## 📋 Table of Contents
+## Table of Contents
 
-1. [Project Overview](#-project-overview)
-2. [How to Replicate](#-how-to-replicate-step-by-step-setup)
-3. [How to Run the Data Pipeline](#-how-to-run-the-data-pipeline)
-4. [How to Run the Model Pipeline](#-how-to-run-the-model-pipeline)
-5. [How to Run Tests](#-how-to-run-tests)
-6. [Project Structure](#-project-structure)
-7. [Pipeline Architecture](#-pipeline-architecture)
-8. [Dataset Information](#-dataset-information)
-9. [Model Development](#-model-development)
-10. [Experiment Tracking with MLflow](#-experiment-tracking-with-mlflow)
-11. [Model Validation](#-model-validation)
-12. [Model Bias Detection (Fairlearn)](#-model-bias-detection-fairlearn)
-13. [Sensitivity Analysis (SHAP)](#-sensitivity-analysis-shap)
-14. [CI/CD Pipeline Automation](#-cicd-pipeline-automation)
-15. [Model Registry & Deployment](#-model-registry--deployment)
-16. [Data Versioning with DVC](#-data-versioning-with-dvc)
-17. [Team Members](#-team-members)
+1. [Project Overview](#project-overview)
+2. [Live Deployment](#live-deployment)
+3. [How to Replicate](#how-to-replicate-step-by-step-setup)
+4. [How to Run the Data Pipeline](#how-to-run-the-data-pipeline)
+5. [How to Run the Model Pipeline](#how-to-run-the-model-pipeline)
+6. [How to Run Tests](#how-to-run-tests)
+7. [Project Structure](#project-structure)
+8. [Pipeline Architecture](#pipeline-architecture)
+9. [Dataset Information](#dataset-information)
+10. [Model Development](#model-development)
+11. [Experiment Tracking with MLflow](#experiment-tracking-with-mlflow)
+12. [Model Validation](#model-validation)
+13. [Model Bias Detection (Fairlearn)](#model-bias-detection-fairlearn)
+14. [Sensitivity Analysis (SHAP)](#sensitivity-analysis-shap)
+15. [FastAPI Backend](#fastapi-backend)
+16. [RAG Chatbot (Gemini)](#rag-chatbot-gemini)
+17. [Kairos Pulse — Streamlit Dashboard](#kairos-pulse--streamlit-dashboard)
+18. [Live GitHub Actions Streaming](#live-github-actions-streaming)
+19. [Email Alert System](#email-alert-system)
+20. [CI/CD Pipeline Automation](#cicd-pipeline-automation)
+21. [Model Registry & Deployment](#model-registry--deployment)
+22. [Data Versioning with DVC](#data-versioning-with-dvc)
+23. [Team Members](#team-members)
 
 ---
 
-## 📖 Project Overview
+## Project Overview
 
-**Pipeline Autopilot** is an MLOps system that predicts CI/CD pipeline failures before they happen using Machine Learning, and explains root causes using RAG (Retrieval-Augmented Generation).
+**Pipeline Autopilot** is an end-to-end MLOps system that predicts CI/CD pipeline failures before they happen using Machine Learning, and explains root causes using RAG (Retrieval-Augmented Generation). The system is deployed on Google Cloud Platform and branded as **Kairos Pulse** for the Google Cambridge Showcase — April 15, 2026.
 
 ### Problem Statement
-- Data pipelines fail unexpectedly → engineers waste hours debugging
-- Manual monitoring is inefficient and reactive
-- No proactive failure prevention exists
 
-### Our Solution
-- **Predict** pipeline failures before execution using ML models
-- **Warn** users with probability scores
-- **Explain** root causes using RAG
-- **Suggest** fixes based on historical patterns
+- Data pipelines fail unexpectedly, causing engineers to waste hours debugging
+- Manual monitoring is inefficient and entirely reactive
+- No proactive failure prevention mechanism exists in standard CI/CD tools
+
+### Solution
+
+- **Predict** pipeline failures before execution using an XGBoost model trained on 150K real GitHub Actions runs
+- **Score** every incoming run in under 200ms via a Cloud Run API
+- **Explain** root causes using a Gemini-powered RAG chatbot with FAISS vector search
+- **Alert** the team automatically via Gmail when a HIGH risk run is detected
+- **Block** high-risk runs and provide actionable fix recommendations
 
 ### Key Features
-- ✅ Automated data acquisition and preprocessing
-- ✅ Schema validation and statistics generation
-- ✅ Anomaly detection with alerts
-- ✅ Data-level and model-level bias detection
-- ✅ Data versioning with DVC
-- ✅ Full pipeline orchestration with Apache Airflow
-- ✅ ML model training with XGBoost + hyperparameter tuning
-- ✅ Experiment tracking with MLflow
-- ✅ Model validation with threshold analysis and rollback
-- ✅ Model-level bias detection with Fairlearn
-- ✅ Sensitivity analysis with SHAP
-- ✅ CI/CD automation with GitHub Actions
-- ✅ Model registry push to GCP Artifact Registry
-- ✅ Comprehensive logging, error handling, and unit tests
+
+- Automated data acquisition and preprocessing
+- Schema validation and statistics generation
+- Anomaly detection with alerts
+- Data-level and model-level bias detection with Fairlearn
+- Data versioning with DVC
+- Full pipeline orchestration with Apache Airflow
+- ML model training with XGBoost and hyperparameter tuning
+- Experiment tracking with MLflow
+- Model validation with threshold analysis and rollback mechanism
+- Sensitivity analysis with SHAP
+- CI/CD automation with GitHub Actions
+- Model registry push to GCP Artifact Registry
+- FastAPI REST backend deployed on Cloud Run
+- Gemini RAG chatbot for root cause diagnosis
+- Streamlit dashboard (Kairos Pulse) deployed on Cloud Run
+- Live GitHub Actions streaming with real-time scoring
+- Automated email alerts for high-risk pipeline runs
 
 ---
 
-## 🔧 How to Replicate (Step-by-Step Setup)
+## Live Deployment
 
-Follow these instructions to set up the project on your machine.
+Both services are deployed on GCP Cloud Run and publicly accessible.
+
+| Service | URL |
+|---------|-----|
+| **Kairos Pulse — Streamlit Dashboard** | https://pipeline-autopilot-frontend-60271318606.us-central1.run.app |
+| **FastAPI Prediction Backend** | https://pipeline-autopilot-60271318606.us-central1.run.app |
+
+### Quick Health Check
+
+```bash
+curl https://pipeline-autopilot-60271318606.us-central1.run.app/health
+```
+
+Expected response:
+
+```json
+{
+  "status": "healthy",
+  "model_name": "XGBoost Tuned",
+  "auc_roc": 0.9808
+}
+```
+
+---
+
+## How to Replicate (Step-by-Step Setup)
 
 ### Prerequisites
 
@@ -87,111 +127,104 @@ cd pipeline-autopilot
 
 ### Step 2: Create Environment File
 
-Create a `.env` file in the project root:
-
 ```bash
-# For Windows PowerShell:
+# Windows PowerShell
 echo "AIRFLOW_UID=50000" > .env
 
-# For Mac/Linux:
+# Mac/Linux
 echo "AIRFLOW_UID=$(id -u)" > .env
 ```
 
-### Step 3: Install Python Dependencies (Optional - for local development)
+### Step 3: Install Python Dependencies
 
 ```bash
-# Create virtual environment
 python -m venv venv
 
-# Activate virtual environment
-# Windows:
+# Windows
 venv\Scripts\activate
-# Mac/Linux:
+
+# Mac/Linux
 source venv/bin/activate
 
-# Install dependencies
 pip install -r requirements.txt
 ```
 
 ### Step 4: Verify Setup
 
 ```bash
-# Test configuration
 python scripts/config.py
 ```
 
 Expected output:
+
 ```
 ============================================================
 PIPELINE AUTOPILOT CONFIGURATION
 ============================================================
-✅ All directories verified/created!
-✅ Raw dataset found: .../data/raw/final_dataset.csv
+All directories verified/created!
+Raw dataset found: .../data/raw/final_dataset.csv
 ```
 
 ---
 
-## ▶️ How to Run the Data Pipeline
+## How to Run the Data Pipeline
 
 ### Step 1: Start Docker Desktop
 
-Make sure Docker Desktop is running (check for "Engine running" status).
+Ensure Docker Desktop is running and the Engine shows as healthy.
 
 ### Step 2: Start Airflow
 
 ```bash
-cd pipeline-autopilot
-
-# Start all services
 docker-compose up -d
 ```
 
-Wait 2-3 minutes for all containers to initialize.
+Wait 2–3 minutes for all containers to initialise.
 
-### Step 3: Verify Containers are Running
+### Step 3: Verify Containers
 
 ```bash
 docker-compose ps
 ```
 
-Expected output:
+All four services should show `Up (healthy)`:
+
 ```
-NAME                           STATUS
-pipeline_autopilot_postgres    Up (healthy)
-pipeline_autopilot_scheduler   Up (healthy)
-pipeline_autopilot_triggerer   Up (healthy)
-pipeline_autopilot_webserver   Up (healthy)
+pipeline_autopilot_postgres
+pipeline_autopilot_scheduler
+pipeline_autopilot_triggerer
+pipeline_autopilot_webserver
 ```
 
 ### Step 4: Access Airflow Web UI
 
-1. Open browser: **http://localhost:8080**
-2. Login credentials:
-   - **Username:** `admin`
-   - **Password:** `admin`
+Open `http://localhost:8080` in your browser.
+
+- **Username:** `admin`
+- **Password:** `admin`
 
 ### Step 5: Run the Data DAG
 
-1. Find DAG: `pipeline_autopilot_data_pipeline`
-2. Enable the DAG (toggle switch ON)
-3. Click **Play ▶️** button → **Trigger DAG**
-4. Click on DAG name → **Graph** tab to watch execution
+1. Locate DAG: `pipeline_autopilot_data_pipeline`
+2. Enable the DAG using the toggle switch
+3. Click **Trigger DAG**
+4. Navigate to the **Graph** tab to monitor execution
 
-### Step 6: Monitor Pipeline Execution
+### Step 6: Monitor Execution
 
-All 7 tasks should complete successfully (green):
+All seven tasks should complete with a green status:
 
 ```
-data_acquisition      ✅
-data_preprocessing    ✅
-schema_validation     ✅ (parallel)
-bias_detection        ✅ (parallel)
-anomaly_detection     ✅
-dvc_versioning        ✅
-pipeline_complete     ✅
+data_acquisition
+data_preprocessing
+schema_validation    (parallel)
+bias_detection       (parallel)
+anomaly_detection
+dvc_versioning
+pipeline_complete
 ```
 
-### Step 7: Stop Airflow (when done)
+### Step 7: Stop Airflow
 
 ```bash
 docker-compose down
@@ -199,377 +232,276 @@ docker-compose down
 
 ---
 
-## 🤖 How to Run the Model Pipeline
+## How to Run the Model Pipeline
 
-### Option 1: Run via Airflow (Model DAG)
+### Option 1: Via Airflow (Model DAG)
 
-1. Start Airflow (same steps as above)
-2. Find DAG: `pipeline_autopilot_model_pipeline`
+1. Start Airflow using the steps above
+2. Locate DAG: `pipeline_autopilot_model_pipeline`
 3. Enable and trigger the DAG
-4. Monitor the model pipeline tasks:
+4. Monitor all nine tasks:
 
 ```
-load_processed_data          ✅
-train_models                 ✅
-select_best_model            ✅
-validate_model               ✅
-model_bias_detection         ✅ (parallel)
-sensitivity_analysis         ✅ (parallel)
-validation_gate              ✅
-push_to_registry             ✅
-model_pipeline_complete      ✅
+load_processed_data
+train_models
+select_best_model
+validate_model
+model_bias_detection    (parallel)
+sensitivity_analysis    (parallel)
+validation_gate
+push_to_registry
+model_pipeline_complete
 ```
 
 ### Option 2: Run Scripts Individually
 
 ```bash
-# Step 1: Train models (Logistic Regression, Random Forest, XGBoost)
 python scripts/model_training.py
-
-# Step 2: Track experiments with MLflow
 python scripts/experiment_tracking.py
-
-# Step 3: Validate the best model on hold-out set
 python scripts/model_validation.py
-
-# Step 4: Run model-level bias detection with Fairlearn
 python scripts/model_bias_detection.py
-
-# Step 5: Run SHAP sensitivity analysis
 python scripts/model_sensitivity.py
-
-# Step 6: Push validated model to registry
 python scripts/model_registry.py
 ```
 
-### Option 3: Run via Docker
+### Option 3: Via Docker
 
 ```bash
-# Build the model training container
 docker build -f Dockerfile.model -t pipeline-autopilot-model .
-
-# Run model training
 docker run pipeline-autopilot-model
 ```
 
-### View MLflow Experiment Results
+### View MLflow Results
 
 ```bash
-# Start MLflow UI
 mlflow ui --port 5000
-
-# Open browser: http://localhost:5000
+# Open: http://localhost:5000
 ```
 
 ---
 
-## 🧪 How to Run Tests
-
-### Run All Tests
+## How to Run Tests
 
 ```bash
-cd pipeline-autopilot
-
-# Activate virtual environment
-source venv/bin/activate  # Mac/Linux
-venv\Scripts\activate     # Windows
-
-# Run all tests
+# All tests
 pytest tests/ -v
-```
 
-### Run Data Pipeline Tests
+# Data pipeline tests only
+pytest tests/test_data_preprocessing.py tests/test_schema_validation.py tests/test_anomaly_detection.py tests/test_logging_config.py -v
 
-```bash
-pytest tests/test_data_preprocessing.py -v
-pytest tests/test_schema_validation.py -v
-pytest tests/test_anomaly_detection.py -v
-pytest tests/test_logging_config.py -v
-```
+# Model pipeline tests only
+pytest tests/test_model_training.py tests/test_model_validation.py tests/test_model_bias.py -v
 
-### Run Model Pipeline Tests
-
-```bash
-pytest tests/test_model_training.py -v
-pytest tests/test_model_validation.py -v
-pytest tests/test_model_bias.py -v
-```
-
-### Run Tests with Coverage Report
-
-```bash
+# With coverage report
 pytest tests/ -v --cov=scripts --cov-report=html
 ```
 
-### Expected Test Output
-
-```
-tests/test_data_preprocessing.py::test_load_data PASSED
-tests/test_data_preprocessing.py::test_handle_missing_values PASSED
-tests/test_schema_validation.py::test_validate_schema PASSED
-tests/test_anomaly_detection.py::test_detect_anomalies PASSED
-tests/test_model_training.py::test_train_model PASSED
-tests/test_model_validation.py::test_validate_model PASSED
-tests/test_model_bias.py::test_bias_detection PASSED
-...
-================= X passed in Y.YYs =================
-```
-
 ---
 
-## 📁 Project Structure
+## Project Structure
 
 ```
 pipeline-autopilot/
+│
+├── app/
+│   ├── main.py                      # FastAPI backend (4 endpoints)
+│   ├── rag_chatbot.py               # Gemini RAG diagnosis engine
+│   ├── live_poller.py               # GitHub Actions live poller
+│   ├── alert_system.py              # Email alert dispatcher
+│   └── __init__.py
+│
+├── frontend/
+│   └── streamlit_app.py             # Kairos Pulse dashboard (5 pages)
 │
 ├── dags/
 │   ├── pipeline_dag.py              # Data pipeline Airflow DAG (7 tasks)
 │   └── model_dag.py                 # Model pipeline Airflow DAG (9 tasks)
 │
 ├── scripts/
-│   ├── config.py                    # Central configuration
-│   ├── data_acquisition.py          # Data loading & validation
-│   ├── data_preprocessing.py        # Data cleaning & transformation
-│   ├── schema_validation.py         # Schema & statistics generation
-│   ├── anomaly_detection.py         # Outlier detection & alerts
-│   ├── bias_detection.py            # Data-level bias analysis
-│   ├── dvc_versioning.py            # Data version control
-│   ├── logging_config.py            # Logging configuration
-│   ├── model_training.py            # Model training & selection (NEW)
-│   ├── experiment_tracking.py       # MLflow experiment tracking (NEW)
-│   ├── model_validation.py          # Hold-out validation & threshold analysis (NEW)
-│   ├── model_bias_detection.py      # Model-level bias with Fairlearn (NEW)
-│   ├── model_sensitivity.py         # SHAP feature importance (NEW)
-│   └── model_registry.py            # GCP Artifact Registry push (NEW)
+│   ├── config.py
+│   ├── data_acquisition.py
+│   ├── data_preprocessing.py
+│   ├── schema_validation.py
+│   ├── anomaly_detection.py
+│   ├── bias_detection.py
+│   ├── dvc_versioning.py
+│   ├── logging_config.py
+│   ├── model_training.py
+│   ├── experiment_tracking.py
+│   ├── model_validation.py
+│   ├── model_bias_detection.py
+│   ├── model_sensitivity.py
+│   └── model_registry.py
 │
-├── models/                          # Model artifacts (NEW)
-│   ├── trained/                     # Saved model files (.joblib)
+├── models/
+│   ├── trained/
 │   │   ├── best_model.joblib
-│   │   ├── previous_model.joblib
-│   │   └── previous_metrics.json
-│   ├── registry/                    # Registry metadata & bias reports
+│   │   ├── scaler.joblib
+│   │   ├── model_metadata.json
+│   │   └── feature_names.json
+│   ├── registry/
 │   │   ├── registry_manifest.json
 │   │   └── model_bias_report.json
-│   └── sensitivity/                 # SHAP & feature importance outputs
-│       ├── hyperparameter_sensitivity/
+│   └── sensitivity/
+│       ├── shap_summary.png
 │       ├── auc_comparison.png
 │       └── feature_importance_comparison.png
 │
+├── knowledge_base/
+│   ├── daily_stats.json
+│   ├── error_stats.json
+│   ├── global_stats.json
+│   ├── repo_stats.json
+│   └── similar_runs_index.pkl       # FAISS vector index
+│
+├── monitoring/
+│   ├── drift_detection.py
+│   ├── performance_monitor.py
+│   └── retrain_trigger.py
+│
 ├── data/
-│   ├── raw/                         # Raw dataset
-│   ├── processed/                   # Cleaned dataset
-│   ├── schema/                      # Schema & statistics JSON files
-│   └── reports/                     # Bias detection reports (PNG)
+│   ├── raw/
+│   ├── processed/
+│   ├── schema/
+│   └── reports/
 │
 ├── tests/
-│   ├── conftest.py                  # Test fixtures
-│   ├── test_data_preprocessing.py   # Preprocessing tests
-│   ├── test_schema_validation.py    # Schema validation tests
-│   ├── test_anomaly_detection.py    # Anomaly detection tests
-│   ├── test_logging_config.py       # Logging tests
-│   ├── test_model_training.py       # Model training tests (NEW)
-│   ├── test_model_validation.py     # Model validation tests (NEW)
-│   └── test_model_bias.py           # Model bias tests (NEW)
+│   ├── conftest.py
+│   ├── test_data_preprocessing.py
+│   ├── test_schema_validation.py
+│   ├── test_anomaly_detection.py
+│   ├── test_logging_config.py
+│   ├── test_model_training.py
+│   ├── test_model_validation.py
+│   └── test_model_bias.py
+│
+├── deploy/
+│   ├── deploy_cloudrun.sh           # FastAPI deployment script
+│   └── deploy_streamlit.sh          # Streamlit deployment script
 │
 ├── .github/
 │   └── workflows/
-│       └── ml_pipeline.yml          # CI/CD with GitHub Actions (NEW)
+│       ├── ml_pipeline.yml
+│       └── deploy.yml               # Auto-deploy on push to main
 │
-├── logs/                            # Airflow logs
-├── mlruns/                          # MLflow experiment logs (gitignored)
-│
-├── .dvc/                            # DVC configuration
-├── dvc.yaml                         # DVC pipeline definition
-├── dvc.lock                         # DVC lock file
-│
-├── docker-compose.yaml              # Airflow Docker setup
-├── Dockerfile.model                 # Docker for model training (NEW)
-├── requirements.txt                 # Python dependencies
-├── .gitignore                       # Git ignore rules
-├── .env                             # Environment variables
-└── README.md                        # This file
+├── Dockerfile.app                   # FastAPI container
+├── Dockerfile.streamlit             # Streamlit container
+├── Dockerfile.model                 # Model training container
+├── docker-compose.yaml
+├── cloudbuild.yaml
+├── requirements.txt
+├── dvc.yaml
+└── README.md
 ```
 
 ---
 
-## 🔄 Pipeline Architecture
+## Pipeline Architecture
 
 ### Data Pipeline DAG
 
 ```
-┌──────────────────┐
-│ data_acquisition │
-└────────┬─────────┘
-         │
-         ▼
-┌────────────────────┐
-│ data_preprocessing │
-└────────┬───────────┘
-         │
-    ┌────┴────┐
-    │         │
-    ▼         ▼
-┌─────────┐ ┌─────────────┐
-│ schema  │ │    bias     │  ← PARALLEL EXECUTION
-│validation│ │  detection  │
-└────┬────┘ └──────┬──────┘
-     │             │
-     └──────┬──────┘
-            │
-            ▼
-   ┌─────────────────┐
-   │anomaly_detection│
-   └────────┬────────┘
-            │
-            ▼
-   ┌─────────────────┐
-   │  dvc_versioning │
-   └────────┬────────┘
-            │
-            ▼
-   ┌─────────────────┐
-   │pipeline_complete│
-   └─────────────────┘
+data_acquisition
+       |
+data_preprocessing
+       |
+  _____|_____
+ |           |
+schema     bias          <- parallel
+validation detection
+ |___________|
+       |
+anomaly_detection
+       |
+dvc_versioning
+       |
+pipeline_complete
 ```
 
 ### Model Pipeline DAG
 
 ```
-┌──────────────────────┐
-│  load_processed_data │
-└──────────┬───────────┘
-           │
-           ▼
-┌──────────────────────────────────────────────────┐
-│  train_models (Logistic Reg, RF, XGBoost + tuning)│
-└──────────┬───────────────────────────────────────┘
-           │
-           ▼
-┌──────────────────────────────────┐
-│  select_best_model (AUC-ROC)    │
-└──────────┬───────────────────────┘
-           │
-           ▼
-┌──────────────────────────────────────────┐
-│  validate_model (hold-out, threshold)    │
-└──────────┬───────────────────────────────┘
-           │
-      ┌────┴────┐
-      │         │
-      ▼         ▼
-┌───────────┐ ┌─────────────┐
-│model_bias │ │ sensitivity │  ← PARALLEL EXECUTION
-│detection  │ │  analysis   │
-└─────┬─────┘ └──────┬──────┘
-      │              │
-      └──────┬───────┘
-             │
-             ▼
-   ┌───────────────────────────────────────────┐
-   │  validation_gate (AUC > 0.85? No bias?)   │
-   └──────────┬────────────────────────────────┘
-              │
-              ▼
-   ┌──────────────────────────────────┐
-   │  push_to_registry (GCP Artifact) │
-   └──────────┬───────────────────────┘
-              │
-              ▼
-   ┌───────────────────────┐
-   │ model_pipeline_complete│
-   └───────────────────────┘
+load_processed_data
+       |
+train_models  (Logistic Regression, Random Forest, XGBoost + tuning)
+       |
+select_best_model  (by AUC-ROC)
+       |
+validate_model  (hold-out + threshold analysis)
+       |
+  _____|_____
+ |           |
+model_bias  sensitivity   <- parallel
+detection   analysis
+ |___________|
+       |
+validation_gate  (AUC > 0.85, no bias flags)
+       |
+push_to_registry  (GCP Artifact Registry)
+       |
+model_pipeline_complete
 ```
 
-### Data Pipeline Execution Screenshots
+### Pipeline Execution Screenshots
 
-#### Pipeline Status & Task History
-All 7 tasks completed successfully with multiple successful runs:
+#### Pipeline Status and Task History
 
 ![Pipeline Status](images/pipeline_status.png)
 
-#### Graph View - DAG Structure
-Shows parallel execution of `schema_validation` and `bias_detection`:
+#### Graph View — DAG Structure
 
 ![Pipeline Graph](images/pipeline_graph.png)
 
-#### Gantt Chart - Execution Timeline
-Visualizes task duration and parallel execution:
+#### Gantt Chart — Execution Timeline
 
 ![Pipeline Gantt](images/pipeline_gantt.png)
 
-### Model Pipeline Execution Screenshots
-
-#### Model DAG - Graph View
-<!-- 📸 SCREENSHOT NEEDED: Airflow Graph view of model_dag showing all tasks green -->
-![Model Pipeline Graph](images/model_pipeline_graph.png)
-
-#### Model DAG - Task History
-<!-- 📸 SCREENSHOT NEEDED: Airflow task history showing successful model pipeline runs -->
-![Model Pipeline Status](images/model_pipeline_status.png)
-
 ---
 
-## 📊 Dataset Information
-
-### Overview
-
-The project uses a **preprocessed dataset** generated by `data_preprocessing.py` from the raw CI/CD pipeline logs.
+## Dataset Information
 
 | Property | Value |
 |----------|-------|
-| **File** | `data/processed/final_dataset_processed.csv` |
-| **Total Rows** | 149,967 |
-| **Total Columns** | 32 |
-| **Target Variable** | `failed` (binary: 0/1) |
-| **Failure Rate** | ~11.33% |
+| Raw file | `data/raw/final_dataset.csv` |
+| Processed file | `data/processed/final_dataset_processed.csv` |
+| Total rows | 149,967 |
+| Total columns | 32 |
+| Target variable | `failed` (binary: 0 / 1) |
+| Failure rate | ~11.33% |
 
-### Data Pipeline Flow
+### Data Sources
 
-```
-Raw Data                          Preprocessed Data
-(final_dataset.csv)        →     (final_dataset_processed.csv)
-150,000 rows x 26 cols           149,967 rows x 32 cols
-                           ↑
-                  data_preprocessing.py
-                  - Handle missing values
-                  - Remove duplicates (33 removed)
-                  - Encode categoricals (+6 new cols)
-                  - Validate constraints
-                  - Cap outliers
-```
+- **100,000 rows** — real GitHub Actions runs scraped from 50 open-source repositories (Airflow, Spark, Kubernetes, TensorFlow, dbt, Kafka, and others) using parallel processing with 15 threads
+- **50,000 rows** — augmented data generated from on-premises Jupyter pipelines, following the same distribution and feature relationships as the real data
 
-### Column Descriptions
+### Column Categories
 
 | Category | Columns |
 |----------|---------|
-| **ID** | run_id |
-| **Datetime** | trigger_time |
-| **Temporal** | day_of_week, hour, is_weekend |
-| **Performance** | duration_seconds, avg_duration_7_runs, duration_deviation |
-| **Historical** | prev_run_status, failures_last_7_runs, workflow_failure_rate, hours_since_last_run |
-| **Complexity** | total_jobs, failed_jobs, retry_count, concurrent_runs |
-| **Risk** | head_branch, is_main_branch, is_first_run, is_bot_triggered, trigger_type |
-| **Categorical** | pipeline_name, repo, failure_type, error_message |
-| **Target** | failed |
+| ID | run_id |
+| Datetime | trigger_time |
+| Temporal | day_of_week, hour, is_weekend |
+| Performance | duration_seconds, avg_duration_7_runs, duration_deviation |
+| Historical | prev_run_status, failures_last_7_runs, workflow_failure_rate, hours_since_last_run |
+| Complexity | total_jobs, failed_jobs, retry_count, concurrent_runs |
+| Risk | head_branch, is_main_branch, is_first_run, is_bot_triggered, trigger_type |
+| Categorical | pipeline_name, repo, failure_type, error_message |
+| Target | failed |
 
 ### Preprocessing Applied
 
 | Step | Description |
 |------|-------------|
-| Missing Values | Median for numerical, mode for categorical |
-| Duplicates | Removed based on `run_id` |
-| Datetime Parsing | `trigger_time` converted to datetime |
-| Categorical Encoding | Frequency encoding for high-cardinality, label encoding for low-cardinality |
-| Outlier Capping | IQR method (1.5x multiplier) |
-| Constraint Validation | `failed_jobs <= total_jobs`, `workflow_failure_rate` between 0-1 |
+| Missing values | Median for numerical, mode for categorical |
+| Duplicates | 33 removed based on `run_id` |
+| Datetime parsing | `trigger_time` converted to datetime |
+| Categorical encoding | Frequency encoding for high-cardinality, label encoding for low-cardinality |
+| Outlier capping | IQR method (1.5x multiplier) |
+| Constraint validation | `failed_jobs <= total_jobs`, `workflow_failure_rate` in range 0–1 |
 
 ---
 
-## 🧠 Model Development
-
-### Approach
-
-We train and compare multiple ML models to predict CI/CD pipeline failures (`failed` = 1) using the preprocessed dataset (149,967 rows, 32 features).
+## Model Development
 
 ### Data Split
 
@@ -579,254 +511,395 @@ We train and compare multiple ML models to predict CI/CD pipeline failures (`fai
 | Validation | 15% | Hyperparameter tuning |
 | Test | 15% | Final hold-out evaluation |
 
-Stratified on `failed` to preserve the ~11.33% failure rate across all splits.
+All splits are stratified on `failed` to preserve the ~11.33% failure rate.
 
 ### Models Trained
 
-| Model | Description | Class Imbalance Handling |
-|-------|-------------|--------------------------|
-| Logistic Regression | Linear baseline | `class_weight='balanced'` |
-| Random Forest | Ensemble baseline | `class_weight='balanced'` |
-| **XGBoost** | Gradient boosting (primary) | `scale_pos_weight` (~7.8x) |
+| Model | Class Imbalance Handling |
+|-------|--------------------------|
+| Logistic Regression | `class_weight='balanced'` |
+| Random Forest | `class_weight='balanced'` |
+| XGBoost Default | `scale_pos_weight` (~7.8x) |
+| **XGBoost Tuned** | `scale_pos_weight` + RandomizedSearchCV |
+| MLP Neural Network | Class weighting |
 
-### Hyperparameter Tuning
+### Best Model — XGBoost Tuned
 
-XGBoost hyperparameters were tuned using RandomizedSearchCV / Optuna:
+| Metric | Score |
+|--------|-------|
+| Train Accuracy | 96.46% |
+| Test Accuracy | 93.39% |
+| AUC-ROC | 98.08% |
+| AUC-PR | 87.12% |
+| Precision | 65.21% |
+| Recall | 89.37% |
+| F1 Score | 75.40% |
 
-| Parameter | Search Space |
-|-----------|-------------|
-| `n_estimators` | 100 - 500 |
-| `max_depth` | 3 - 10 |
-| `learning_rate` | 0.01 - 0.3 |
-| `subsample` | 0.6 - 1.0 |
-| `colsample_bytree` | 0.6 - 1.0 |
-
-### Model Selection
-
-The best model is selected based on **AUC-ROC** on the validation set. The selected model is saved as `models/trained/best_model.joblib`.
+The decision threshold is set at **0.75**, optimised for the precision-recall balance required in a CI/CD environment where false positives (blocking a safe run) carry a meaningful cost.
 
 **Script:** `scripts/model_training.py`
 
 ---
 
-## 📈 Experiment Tracking with MLflow
+## Experiment Tracking with MLflow
 
-All training runs are tracked using **MLflow** with experiment name `pipelineguard-model-dev`.
+All training runs are tracked under the experiment name `pipelineguard-model-dev`.
 
 ### What is Logged
 
 | Category | Details |
 |----------|---------|
-| **Parameters** | All hyperparameters per model |
-| **Metrics** | AUC-ROC, F1, Precision, Recall, Accuracy |
-| **Artifacts** | Confusion matrices, comparison bar plots |
-| **Model Versions** | Best model registered in MLflow Model Registry (Staging → Production) |
-
-### MLflow UI
+| Parameters | All hyperparameters per model |
+| Metrics | AUC-ROC, F1, Precision, Recall, Accuracy |
+| Artifacts | Confusion matrices, comparison bar plots |
+| Model versions | Best model registered in MLflow Model Registry (Staging → Production) |
 
 ```bash
 mlflow ui --port 5000
 # Open: http://localhost:5000
 ```
 
-#### MLflow Experiment Dashboard
-<!-- 📸 SCREENSHOT NEEDED: MLflow UI showing experiment runs with metrics -->
-![MLflow Experiments](images/mlflow_experiments.png)
-
-#### Model Comparison - AUC Across Models
-<!-- 📸 SCREENSHOT NEEDED: Bar plot comparing AUC of Logistic Reg, RF, XGBoost -->
-![AUC Comparison](models/sensitivity/auc_comparison.png)
-
 **Script:** `scripts/experiment_tracking.py`
 
 ---
 
-## ✅ Model Validation
+## Model Validation
 
 ### Hold-Out Evaluation
 
 The best model is evaluated on the 15% test set that was never used during training or tuning.
 
-### Metrics Computed
-
-| Metric | Description |
-|--------|-------------|
-| Accuracy | Overall correct predictions |
-| Precision | Of predicted failures, how many were real |
-| Recall | Of real failures, how many were caught |
-| F1-Score | Harmonic mean of precision and recall |
-| AUC-ROC | Area under the ROC curve |
-| AUC-PR | Area under the Precision-Recall curve |
-
 ### Threshold Analysis
 
-Decision thresholds are varied from 0.1 to 0.9 to find the optimal threshold for F1-score. This generates a threshold-vs-metric plot.
-
-<!-- 📸 SCREENSHOT NEEDED: Threshold vs F1/Precision/Recall plot -->
-![Threshold Analysis](images/threshold_analysis.png)
-
-### Confusion Matrix
-
-<!-- 📸 SCREENSHOT NEEDED: Confusion matrix heatmap for best model on test set -->
-![Confusion Matrix](images/confusion_matrix.png)
+Decision thresholds are varied from 0.1 to 0.9 to identify the optimal threshold by F1-score.
 
 ### Validation Gate
 
-The model must pass the following checks before proceeding to registry:
+The model must pass all of the following checks before it is allowed into the registry:
+
 - AUC-ROC > 0.85
-- No critical bias flags
-- Performance >= previous model (rollback otherwise)
+- No critical bias flags from Fairlearn
+- Performance equal to or better than the previous production model
 
 ### Rollback Mechanism
 
-If the newly trained model performs worse than the previous best model (compared by AUC), the system rejects the new model and keeps `previous_model.joblib` as the production model.
+If the newly trained model performs worse than the previously registered model (compared by AUC-ROC), the system rejects the new model and retains `previous_model.joblib` as the active production model.
 
 **Script:** `scripts/model_validation.py`
 
 ---
 
-## ⚖️ Model Bias Detection (Fairlearn)
+## Model Bias Detection (Fairlearn)
 
-### Data-Level Bias (Assignment 1)
+### Data-Level Bias
 
-We use **data slicing** to analyze failure rate distributions across subgroups.
+Data slicing is used to analyse failure rate distributions across subgroups:
 
-| Feature | Type | Slices |
-|---------|------|--------|
-| `repo` | Categorical | 50 repositories |
-| `pipeline_name` | Categorical | Multiple pipelines |
-| `trigger_type` | Categorical | push, pull_request, schedule, etc. |
-| `is_weekend` | Binary | Weekend vs Weekday |
-| `is_bot_triggered` | Binary | Bot vs Human |
+| Feature | Slices |
+|---------|--------|
+| `repo` | 50 repositories |
+| `pipeline_name` | All pipeline types |
+| `trigger_type` | push, pull_request, schedule, workflow_dispatch |
+| `is_weekend` | Weekend vs Weekday |
+| `is_bot_triggered` | Bot vs Human |
 
-### Model-Level Bias (Assignment 2)
+### Model-Level Bias
 
-We use **Fairlearn MetricFrame** to evaluate whether the trained model predicts fairly across different subgroups.
-
-### Slicing Features for Model Bias
-
-| Feature | Why |
-|---------|-----|
-| `trigger_type` | Model shouldn't favor push over schedule |
-| `is_bot_triggered` | Bot vs human runs should be treated fairly |
-| `is_main_branch` | Main branch shouldn't be over/under-flagged |
-| `is_weekend` | Weekend runs should get fair predictions |
-| `repo` (top 10) | No single repo should be unfairly flagged |
-
-### Metrics Tracked Per Slice
-
-- Accuracy, F1, FPR (False Positive Rate), FNR (False Negative Rate)
-
-### Disparity Metrics
+Fairlearn `MetricFrame` evaluates whether the trained model predicts fairly across subgroups. Disparity metrics tracked:
 
 - Demographic Parity Difference
 - Equalized Odds Difference
 
-### Bias Mitigation
+If disparity exceeds 1.5x between any two groups, `ThresholdOptimizer` from Fairlearn adjusts decision thresholds per group.
 
-If disparity exceeds 1.5x between any two groups:
-- **ThresholdOptimizer** (Fairlearn) adjusts decision thresholds per group
-- Or class re-weighting is applied
-
-### Bias Report
-
-Generated at: `models/registry/model_bias_report.json`
-
-<!-- 📸 SCREENSHOT NEEDED: Per-slice metric bar charts (e.g., F1 by trigger_type) -->
-![Bias Metrics by Slice](images/bias_per_slice.png)
+Bias report is saved to: `models/registry/model_bias_report.json`
 
 **Script:** `scripts/model_bias_detection.py`
 
 ---
 
-## 🔍 Sensitivity Analysis (SHAP)
+## Sensitivity Analysis (SHAP)
 
-### Feature Importance
+SHAP (SHapley Additive exPlanations) is used to explain which features drive each prediction.
 
-We use **SHAP (SHapley Additive exPlanations)** to explain which features drive the model's predictions.
+### Outputs
 
-#### SHAP Summary Plot (Beeswarm)
-<!-- 📸 SCREENSHOT NEEDED: SHAP beeswarm summary plot -->
-![SHAP Summary](images/shap_summary.png)
-
-#### Feature Importance Comparison
-Compares SHAP-based importance vs XGBoost built-in `feature_importances_`:
-
-![Feature Importance Comparison](models/sensitivity/feature_importance_comparison.png)
-
-### Hyperparameter Sensitivity
-
-We vary the top 3 hyperparameters independently and plot AUC vs parameter value to show which hyperparameters have the most impact.
-
-<!-- 📸 SCREENSHOT NEEDED: Hyperparameter sensitivity plots -->
-![Hyperparameter Sensitivity](images/hyperparameter_sensitivity.png)
+| File | Description |
+|------|-------------|
+| `models/sensitivity/shap_summary.png` | Beeswarm plot — feature impact distribution |
+| `models/sensitivity/shap_bar.png` | Mean absolute SHAP values |
+| `models/sensitivity/feature_importance_comparison.png` | SHAP vs XGBoost built-in importance |
+| `models/sensitivity/auc_comparison.png` | AUC across all trained models |
+| `models/sensitivity/hyperparameter_sensitivity/` | AUC vs each hyperparameter value |
 
 **Script:** `scripts/model_sensitivity.py`
 
 ---
 
-## 🔁 CI/CD Pipeline Automation
+## FastAPI Backend
 
-### GitHub Actions Workflow
+The prediction backend is built with FastAPI and deployed on GCP Cloud Run.
 
-The CI/CD pipeline is defined in `.github/workflows/ml_pipeline.yml` and triggers automatically on push to the `model-dev` branch.
+**Base URL:** `https://pipeline-autopilot-60271318606.us-central1.run.app`
 
-### Pipeline Steps
+### Endpoints
 
-```
-Push to model-dev branch
-        │
-        ▼
-  Install dependencies
-        │
-        ▼
-  Run model training
-        │
-        ▼
-  Run model validation
-        │
-        ▼
-  Run bias detection
-        │
-        ▼
-  Validation gate check
-   (AUC > 0.85? No bias?)
-        │
-   ┌────┴────┐
-   │         │
-  PASS      FAIL
-   │         │
-   ▼         ▼
-Push to    Block deploy
-registry   + notify
+| Method | Endpoint | Description |
+|--------|----------|-------------|
+| `GET` | `/health` | Returns model status, name, version, and AUC-ROC |
+| `POST` | `/predict` | Accepts 21 pipeline features, returns failure probability, risk level, and top SHAP features |
+| `POST` | `/explain` | Accepts run features and a user message, returns a Gemini RAG diagnosis |
+| `GET` | `/metrics` | Returns a summary of the last 100 predictions |
+
+### Example — /predict
+
+```bash
+curl -X POST https://pipeline-autopilot-60271318606.us-central1.run.app/predict \
+  -H "Content-Type: application/json" \
+  -d '{"workflow_failure_rate": 0.62, "failures_last_7_runs": 4, "prev_run_status": 1, "retry_count": 2}'
 ```
 
-### Automated Checks
-- Model training completes successfully
-- Validation metrics exceed thresholds
-- Bias checks pass across all slices
-- If any check fails → pipeline fails, team is notified
+Response:
 
-### GitHub Actions Run
-<!-- 📸 SCREENSHOT NEEDED: GitHub Actions showing successful workflow run -->
-![GitHub Actions](images/github_actions.png)
+```json
+{
+  "probability": 0.847,
+  "prediction": 1,
+  "risk_level": "HIGH",
+  "top_shap_features": [
+    {"feature": "workflow_failure_rate", "shap_value": 0.312, "direction": "increases_risk"},
+    {"feature": "failures_last_7_runs",  "shap_value": 0.198, "direction": "increases_risk"}
+  ]
+}
+```
 
-**Config:** `.github/workflows/ml_pipeline.yml`
+### Risk Thresholds
+
+| Risk Level | Probability |
+|------------|-------------|
+| HIGH | >= 0.75 |
+| MEDIUM | >= 0.40 |
+| LOW | < 0.40 |
+
+**File:** `app/main.py`
+
+### Deployment
+
+```bash
+bash deploy/deploy_cloudrun.sh
+```
 
 ---
 
-## 📦 Model Registry & Deployment
+## RAG Chatbot (Gemini)
 
-### Model Registry
+The `/explain` endpoint powers an AI chatbot that diagnoses why a pipeline is at risk and recommends specific remediation steps.
 
-Once the model passes validation and bias checks, it is pushed to **GCP Artifact Registry** (or GCS bucket as fallback).
+### Architecture
+
+```
+User question
+      |
+POST /explain  (FastAPI)
+      |
+FAISS vector search  (knowledge_base/similar_runs_index.pkl)
+      |
+Retrieve similar past failure records
+      |
+Gemini generates diagnosis using retrieved context
+      |
+Response returned to Streamlit UI
+```
+
+### LLM Type
+
+The system uses **Retrieval-Augmented Generation (RAG)**. Gemini does not answer purely from its training data — it first retrieves relevant failure history from the knowledge base, then generates a contextualised diagnosis grounded in that data.
+
+### Knowledge Base Files
+
+| File | Contents |
+|------|----------|
+| `knowledge_base/similar_runs_index.pkl` | FAISS vector index of historical runs |
+| `knowledge_base/global_stats.json` | Aggregate failure statistics |
+| `knowledge_base/daily_stats.json` | Failure patterns by day and hour |
+| `knowledge_base/error_stats.json` | Failure type distributions |
+| `knowledge_base/repo_stats.json` | Per-repository failure profiles |
+
+**File:** `app/rag_chatbot.py`
+
+---
+
+## Kairos Pulse — Streamlit Dashboard
+
+The frontend is a single-file Streamlit application branded as **Kairos Pulse** and deployed on GCP Cloud Run.
+
+**Live URL:** `https://pipeline-autopilot-frontend-60271318606.us-central1.run.app`
+
+### Pages
+
+| Page | Description |
+|------|-------------|
+| Overview | Landing page with animated pipeline canvas, feature cards, and product description |
+| Pipeline Monitor | Live scoring dashboard — streams GitHub Actions runs, shows risk scores, surfaces HIGH risk runs with fix recommendations |
+| Root Cause Analysis | Gemini RAG chatbot — SHAP gauge, feature impact bar chart, and conversational diagnosis |
+| Audit Log | Full scored-run log, risk breakdown pie chart, probability scatter chart, compute-saved metrics |
+| Incidents | Active and resolved HIGH risk alerts with top offending pipelines |
+
+### Run Locally
+
+```bash
+python -m streamlit run frontend/streamlit_app.py
+```
+
+### Redeploy to Cloud Run
+
+```bash
+# Step 1: Rebuild the image
+docker build -t gcr.io/datapipeline-autopilot/pipeline-autopilot-frontend:latest -f Dockerfile.streamlit .
+
+# Step 2: Push to GCR
+docker push gcr.io/datapipeline-autopilot/pipeline-autopilot-frontend:latest
+
+# Step 3: Deploy
+gcloud run deploy pipeline-autopilot-frontend \
+  --image=gcr.io/datapipeline-autopilot/pipeline-autopilot-frontend:latest \
+  --region=us-central1 \
+  --platform=managed \
+  --allow-unauthenticated \
+  --port=8080 \
+  --memory=1Gi \
+  --cpu=1 \
+  --set-env-vars="CLOUD_RUN_URL=https://pipeline-autopilot-60271318606.us-central1.run.app" \
+  --quiet
+```
+
+Or use the deployment script:
+
+```bash
+bash deploy/deploy_streamlit.sh
+```
+
+**File:** `frontend/streamlit_app.py`
+
+---
+
+## Live GitHub Actions Streaming
+
+The Pipeline Monitor page can stream real GitHub Actions workflow runs directly from the GitHub API and score them in real time via the Cloud Run backend.
+
+### How It Works
+
+1. User provides a GitHub Personal Access Token (PAT) with `repo` and `workflow` read scopes
+2. The app fetches recent workflow runs from the configured repositories via the GitHub Actions API
+3. Job-level details are retrieved to extract `failed_jobs`, `total_jobs`, and failure rate
+4. Each run is sent to `/predict` on the Cloud Run backend
+5. Results are displayed row by row as scoring completes
+
+### Repositories Monitored
+
+```python
+REPOS = [
+    "ClickHouse/ClickHouse",
+    "ClickHouse/clickhouse-java",
+    "ClickHouse/clickhouse-go",
+    "ClickHouse/dbt-clickhouse",
+]
+```
+
+These can be updated directly in `frontend/streamlit_app.py`.
+
+### Fallback Behaviour
+
+If no GitHub token is provided, the app falls back to a set of representative hardcoded demo runs and scores them through the same Cloud Run endpoint, demonstrating the full prediction pipeline without requiring API access.
+
+---
+
+## Email Alert System
+
+When any scored pipeline run reaches a HIGH risk classification (probability >= 0.75), an automated HTML email alert is dispatched to the designated recipient.
+
+### Alert Contents
+
+- Run ID, pipeline name, repository, and branch
+- Failure probability and risk classification
+- Workflow failure rate, failures in last 7 runs, previous run status
+- Ordered list of recommended fix steps generated from the pipeline's history
+
+### Configuration
+
+| Variable | Value |
+|----------|-------|
+| Sender | `pipelineguard.alerts@gmail.com` |
+| Recipient | `varupandi@gmail.com` |
+| Transport | Gmail SMTP — STARTTLS port 587, SSL port 465 fallback |
+
+To change the recipient, update `ALERT_RECIPIENT` in `frontend/streamlit_app.py` or set it as an environment variable.
+
+**File:** `frontend/streamlit_app.py` — `send_gmail_alert()`
+
+---
+
+## CI/CD Pipeline Automation
+
+### GitHub Actions Workflows
+
+Two workflows are defined under `.github/workflows/`:
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `ml_pipeline.yml` | Push to `model-dev` branch | Train, validate, bias-check, and push model to registry |
+| `deploy.yml` | Push to `main` branch | Build Docker image, push to GCR, deploy to Cloud Run |
+
+### ML Pipeline Flow
+
+```
+Push to model-dev
+       |
+Install dependencies
+       |
+Run model training
+       |
+Run model validation
+       |
+Run bias detection
+       |
+Validation gate  (AUC > 0.85, no critical bias)
+       |
+  _____|_____
+ |           |
+PASS        FAIL
+ |           |
+Push to    Block + notify
+registry
+```
+
+### Deploy Flow
+
+```
+Push to main
+       |
+Build Docker image  (Dockerfile.app)
+       |
+Push to Google Container Registry
+       |
+Deploy to Cloud Run  (us-central1)
+       |
+Get live URL
+```
+
+---
+
+## Model Registry & Deployment
+
+Once the model passes validation and bias checks, it is pushed to **GCP Artifact Registry** with a GCS bucket as fallback.
 
 ### Registry Metadata
 
-Each model version is tagged with:
-- Model version ID (timestamp-based)
-- AUC-ROC, F1, Precision, Recall
-- Bias check status (pass/fail)
+Each version is tagged with:
+
+- Version ID in format `v{date}-{model_hash}`
+- AUC-ROC, F1, Precision, Recall metrics
+- Bias check status
 - Git commit hash
 
 Registry manifest: `models/registry/registry_manifest.json`
@@ -835,137 +908,88 @@ Registry manifest: `models/registry/registry_manifest.json`
 
 ---
 
-## 📦 Data Versioning with DVC
-
-### Initialize DVC (already done)
+## Data Versioning with DVC
 
 ```bash
-dvc init
-```
-
-### Track Data Files
-
-```bash
+# Track data files
 dvc add data/raw/final_dataset.csv
 dvc add data/processed/final_dataset_processed.csv
-```
 
-### Push to Remote Storage
-
-```bash
-# Configure remote (Google Cloud Storage)
+# Configure remote
 dvc remote add -d gcs_remote gs://your-bucket-name
 
 # Push data
 dvc push
-```
 
-### Pull Data on Another Machine
-
-```bash
+# Pull data on another machine
 dvc pull
-```
 
-### View Data Version History
-
-```bash
+# View version differences
 dvc diff
 ```
 
 ---
 
-## 👥 Team Members
+## Team Members
 
-| Member | Role | Assignment 1 | Assignment 2 |
-|--------|------|-------------|-------------|
-| Member 1 | Pipeline Architect / ML Engineer | Folder structure, config.py, Airflow DAG, Docker setup | Model training & selection, Model DAG |
-| Member 2 | Data Engineer / MLOps Engineer | Data acquisition scripts | MLflow experiment tracking, model versioning |
-| Member 3 | Data Scientist | Data preprocessing, feature engineering | Model validation, threshold analysis |
-| Member 4 | Quality Engineer / Fairness Analyst | Schema validation, anomaly detection | Model-level bias detection (Fairlearn) |
-| Member 5 | MLOps Engineer | DVC versioning, bias detection | SHAP sensitivity analysis, GCP registry push |
-| Member 6 | Test Engineer / DevOps | Unit tests, logging configuration | CI/CD pipeline (GitHub Actions), Dockerfile, model tests |
+| Member | Role | Responsibilities |
+|--------|------|-----------------|
+| Member 1 | Pipeline Architect / ML Engineer | Folder structure, config.py, Airflow DAGs, Docker setup, model training and selection |
+| Member 2 | Data Engineer / MLOps Engineer | Data acquisition scripts, FastAPI backend, Cloud Run deployment, Kairos Pulse Streamlit dashboard |
+| Member 3 | Data Scientist | Data preprocessing, feature engineering, model validation, threshold analysis |
+| Member 4 | Quality Engineer / Fairness Analyst | Schema validation, anomaly detection, model-level bias detection with Fairlearn |
+| Member 5 | MLOps Engineer | DVC versioning, data bias detection, SHAP sensitivity analysis, GCP registry push |
+| Member 6 | Test Engineer / DevOps | Unit tests, logging configuration, CI/CD pipeline (GitHub Actions), Dockerfiles, model tests |
 
 ---
 
-<img width="2876" height="1588" alt="image" src="https://github.com/user-attachments/assets/c2e1601c-8960-4a5c-99bb-3c3cc18af295" />
-
 ## Troubleshooting
 
-### Common Issues
+**Docker containers not starting**
 
-**1. Docker containers not starting**
 ```bash
 docker-compose down
 docker-compose up -d
 ```
 
-**2. Airflow UI not accessible**
-- Wait 2-3 minutes after starting containers
-- Check: `docker-compose ps` (all should show "healthy")
+**Airflow UI not accessible**
 
-**3. DAG not visible in Airflow**
-- Check for syntax errors: `python dags/pipeline_dag.py`
-- Restart scheduler: `docker-compose restart airflow-scheduler`
+Wait 2–3 minutes after starting containers. Verify all services show `healthy` with `docker-compose ps`. Restart the scheduler with `docker-compose restart airflow-scheduler`.
 
-**4. Tests failing**
-- Ensure virtual environment is activated
-- Install dependencies: `pip install -r requirements.txt`
+**DAG not visible in Airflow**
 
-**5. MLflow UI not loading**
-- Make sure you ran at least one training experiment
-- Check: `ls mlruns/` should have experiment folders
-- Try: `mlflow ui --host 0.0.0.0 --port 5000`
+Check for syntax errors: `python dags/pipeline_dag.py`. Restart the scheduler after fixing any errors.
 
-**6. Model pipeline failing at validation gate**
-- Check AUC threshold in config (default: 0.85)
-- Review bias report: `models/registry/model_bias_report.json`
-- If rollback triggered, check `models/trained/previous_metrics.json`
+**Tests failing**
+
+Ensure the virtual environment is activated and all dependencies are installed: `pip install -r requirements.txt`.
+
+**MLflow UI not loading**
+
+Ensure at least one training experiment has been run. Check that `mlruns/` contains experiment folders. Start with: `mlflow ui --host 0.0.0.0 --port 5000`.
+
+**Model pipeline failing at validation gate**
+
+Review the default AUC threshold (0.85) in `scripts/config.py`. Check the bias report at `models/registry/model_bias_report.json`. If a rollback was triggered, inspect `models/trained/previous_metrics.json`.
+
+**Cloud Run returning 503**
+
+The service scales to zero when idle. The first request after a cold start may take 10–15 seconds. Subsequent requests will be fast.
+
+**Live stream showing no data**
+
+Verify the GitHub PAT has `repo` and `workflow` read scopes. The app will automatically fall back to demo data if the token is missing or invalid.
 
 ---
 
-## 📄 License
-
-This project is for educational purposes (MLOps Course Project - March 2026).
-
----
-
-## 🔗 Links
+## Links
 
 - **GitHub Repository:** https://github.com/anita2210/pipeline-autopilot
-- **Airflow UI:** http://localhost:8080 (when running)
-- **MLflow UI:** http://localhost:5000 (when running)
+- **Kairos Pulse Dashboard:** https://pipeline-autopilot-frontend-60271318606.us-central1.run.app
+- **FastAPI Backend:** https://pipeline-autopilot-60271318606.us-central1.run.app
+- **Airflow UI:** http://localhost:8080 (local only)
+- **MLflow UI:** http://localhost:5000 (local only)
 
 ---
 
----
-
-## 🚀 Assignment 3 — Deployment Updates
-
-### Updated 13-Task DAG
-```
-data_acquisition → data_preprocessing
-  → [schema_validation || bias_detection]
-  → anomaly_detection → dvc_versioning
-  → model_training → model_validation
-  → [model_bias || sensitivity_analysis]
-  → validation_gate → push_to_registry
-  → drift_monitoring → pipeline_complete
-```
-
-### Model Performance
-
-| Model | AUC | F1 |
-|---|---|---|
-| Logistic Regression | ~0.88 | ~0.62 |
-| Random Forest | ~0.91 | ~0.68 |
-| XGBoost Default | ~0.92 | ~0.70 |
-| **XGBoost Tuned** | **~0.93** | **~0.72** |
-| MLP | ~0.89 | ~0.64 |
-
-### Live Endpoint
-- **Cloud Run URL:** *(Member 2 — updating Wed Apr 8)*
-
-### Alert System
-- Fires when prediction probability > 0.75
-- Email contains: pipeline name, risk score, top 3 SHAP features
-- Set env vars: `ALERT_EMAIL_SENDER`, `ALERT_EMAIL_PASSWORD`, `ALERT_EMAIL_RECEIVER`
+*Pipeline Autopilot — MLOps Course Project, Google Cambridge Showcase, April 2026*
