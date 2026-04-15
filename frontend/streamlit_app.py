@@ -193,12 +193,32 @@ div[data-testid="stButton"] button {
     cursor: pointer !important;
 }
 /* RCA quick question buttons */
-.rca-qq-wrap div[data-testid="stButton"] button {
-    background: #eff6ff !important; border: 1.5px solid #2563eb !important;
-    color: #1d4ed8 !important; font-weight: 600 !important;
+.rca-qq-wrap div[data-testid="stButton"] button,
+.rca-qq-wrap div[data-testid="stButton"] > button,
+.rca-qq-wrap button[kind="secondary"],
+.rca-qq-wrap div[data-testid="stBaseButton-secondary"],
+.rca-qq-wrap [data-testid="stBaseButton-secondary"] {
+    background: #1e3a8a !important;
+    background-color: #1e3a8a !important;
+    border: 1.5px solid #1e3a8a !important;
+    color: #ffffff !important;
+    font-weight: 600 !important;
+    box-shadow: 0 2px 6px rgba(30,58,138,0.25) !important;
+    letter-spacing: -0.1px !important;
 }
-.rca-qq-wrap div[data-testid="stButton"] button:hover {
-    background: #2563eb !important; color: #ffffff !important;
+.rca-qq-wrap div[data-testid="stButton"] button:hover,
+.rca-qq-wrap div[data-testid="stButton"] > button:hover {
+    background: #2563eb !important;
+    background-color: #2563eb !important;
+    border-color: #2563eb !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 12px rgba(37,99,235,0.35) !important;
+}
+.rca-qq-wrap div[data-testid="stButton"] button p,
+.rca-qq-wrap div[data-testid="stButton"] button span,
+.rca-qq-wrap div[data-testid="stButton"] button * {
+    color: #ffffff !important;
+    background: transparent !important;
 }
 div[data-testid="stButton"] button[kind="primary"],
 div[data-testid="stButton"] button[kind="primary"] p,
@@ -513,21 +533,37 @@ if "alerts" not in st.session_state:
     top["resolved"]=False; top["email_sent"]=True
     st.session_state.alerts=top.to_dict("records")
 if "trickle_n" not in st.session_state: st.session_state.trickle_n=0
+
+def _gen_synthetic_run():
+    import random
+    _pipelines  = ["build-and-test","backport-pr","docker-publish","nightly-regression",
+                   "lint-check","security-scan","integration-test","deploy-staging",
+                   "benchmark-run","release-build","e2e-test","perf-regression"]
+    _repos      = ["ClickHouse/ClickHouse","ClickHouse/clickhouse-java",
+                   "ClickHouse/clickhouse-go","ClickHouse/dbt-clickhouse"]
+    _triggers   = ["push","pull_request","schedule","workflow_dispatch"]
+    _branches   = ["main","master",
+                   "feature/auth","feature/cache","feature/codec","feature/metrics",
+                   "fix/memory-leak","fix/race-condition","fix/timeout","fix/null-ptr",
+                   "release/24.1","release/23.8","backport/23.8","backport/22.9"]
+    fail_rate = round(random.uniform(0.02, 0.85), 2)
+    fails7    = random.choices([0,1,2,3,4,5,6], weights=[30,25,18,12,8,5,2])[0]
+    prev      = "failure" if random.random() < (fail_rate * 0.8) else "success"
+    return {
+        "run_id":               f"run_{random.randint(10000,99999)}",
+        "pipeline_name":        random.choice(_pipelines),
+        "repo":                 random.choice(_repos),
+        "head_branch":          random.choice(_branches),
+        "trigger_type":         random.choice(_triggers),
+        "workflow_failure_rate": fail_rate,
+        "failures_last_7_runs": fails7,
+        "prev_run_status":      prev,
+        "retry_count":          random.choices([0,1,2,3], weights=[60,25,10,5])[0],
+        "concurrent_runs":      random.randint(1,12),
+    }
+
 if "live_events" not in st.session_state or len(st.session_state.live_events)==0:
-    _seed_runs=[
-        {"run_id":"run_82341","pipeline_name":"build-and-test",    "repo":"ClickHouse/ClickHouse",      "head_branch":"main",             "trigger_type":"push",            "workflow_failure_rate":0.08,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":3},
-        {"run_id":"run_77102","pipeline_name":"backport-pr",        "repo":"ClickHouse/ClickHouse",      "head_branch":"backport/23.8",    "trigger_type":"pull_request",    "workflow_failure_rate":0.62,"failures_last_7_runs":4,"prev_run_status":"failure","retry_count":2,"concurrent_runs":9},
-        {"run_id":"run_65439","pipeline_name":"docker-publish",     "repo":"ClickHouse/ClickHouse",      "head_branch":"release/24.1",     "trigger_type":"push",            "workflow_failure_rate":0.14,"failures_last_7_runs":1,"prev_run_status":"success","retry_count":0,"concurrent_runs":4},
-        {"run_id":"run_91887","pipeline_name":"nightly-regression", "repo":"ClickHouse/ClickHouse",      "head_branch":"main",             "trigger_type":"schedule",        "workflow_failure_rate":0.31,"failures_last_7_runs":2,"prev_run_status":"failure","retry_count":1,"concurrent_runs":6},
-        {"run_id":"run_54210","pipeline_name":"lint-check",         "repo":"ClickHouse/clickhouse-java", "head_branch":"master",           "trigger_type":"pull_request",    "workflow_failure_rate":0.05,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":2},
-        {"run_id":"run_38976","pipeline_name":"security-scan",      "repo":"ClickHouse/ClickHouse",      "head_branch":"feature/new-codec","trigger_type":"push",            "workflow_failure_rate":0.44,"failures_last_7_runs":3,"prev_run_status":"failure","retry_count":2,"concurrent_runs":7},
-        {"run_id":"run_71234","pipeline_name":"integration-test",   "repo":"ClickHouse/clickhouse-go",   "head_branch":"main",             "trigger_type":"pull_request",    "workflow_failure_rate":0.11,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":3},
-        {"run_id":"run_29845","pipeline_name":"deploy-staging",     "repo":"ClickHouse/ClickHouse",      "head_branch":"fix/memory-leak",  "trigger_type":"workflow_dispatch","workflow_failure_rate":0.78,"failures_last_7_runs":5,"prev_run_status":"failure","retry_count":3,"concurrent_runs":10},
-        {"run_id":"run_63571","pipeline_name":"benchmark-run",      "repo":"ClickHouse/ClickHouse",      "head_branch":"main",             "trigger_type":"schedule",        "workflow_failure_rate":0.09,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":2},
-        {"run_id":"run_44892","pipeline_name":"release-build",      "repo":"ClickHouse/ClickHouse",      "head_branch":"release/24.1",     "trigger_type":"push",            "workflow_failure_rate":0.22,"failures_last_7_runs":1,"prev_run_status":"success","retry_count":0,"concurrent_runs":5},
-        {"run_id":"run_87123","pipeline_name":"build-and-test",     "repo":"ClickHouse/dbt-clickhouse",  "head_branch":"main",             "trigger_type":"push",            "workflow_failure_rate":0.06,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":1},
-        {"run_id":"run_52367","pipeline_name":"backport-pr",        "repo":"ClickHouse/ClickHouse",      "head_branch":"backport/23.8",    "trigger_type":"pull_request",    "workflow_failure_rate":0.58,"failures_last_7_runs":3,"prev_run_status":"failure","retry_count":1,"concurrent_runs":8},
-    ]
+    _seed_runs=[_gen_synthetic_run() for _ in range(12)]
     for _r in _seed_runs:
         _s=(_r["workflow_failure_rate"]*3.5+_r["failures_last_7_runs"]*0.12
             +(0.25 if _r["prev_run_status"]=="failure" else 0)
@@ -788,20 +824,20 @@ elif page=="Pipeline Monitor":
             start_stream = st.button("Start Live Stream", type="primary", use_container_width=True)
         st.markdown("<div style='height:12px'></div>", unsafe_allow_html=True)
 
-        DEMO_STREAM_RUNS = [
-            {"run_id":"run_82341","pipeline_name":"build-and-test",    "repo":"ClickHouse/ClickHouse",      "head_branch":"main",             "trigger_type":"push",             "workflow_failure_rate":0.08,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":3},
-            {"run_id":"run_77102","pipeline_name":"backport-pr",        "repo":"ClickHouse/ClickHouse",      "head_branch":"backport/23.8",    "trigger_type":"pull_request",     "workflow_failure_rate":0.62,"failures_last_7_runs":4,"prev_run_status":"failure","retry_count":2,"concurrent_runs":9},
-            {"run_id":"run_65439","pipeline_name":"docker-publish",     "repo":"ClickHouse/ClickHouse",      "head_branch":"release/24.1",     "trigger_type":"push",             "workflow_failure_rate":0.14,"failures_last_7_runs":1,"prev_run_status":"success","retry_count":0,"concurrent_runs":4},
-            {"run_id":"run_91887","pipeline_name":"nightly-regression", "repo":"ClickHouse/ClickHouse",      "head_branch":"main",             "trigger_type":"schedule",         "workflow_failure_rate":0.31,"failures_last_7_runs":2,"prev_run_status":"failure","retry_count":1,"concurrent_runs":6},
-            {"run_id":"run_54210","pipeline_name":"lint-check",         "repo":"ClickHouse/clickhouse-java", "head_branch":"master",           "trigger_type":"pull_request",     "workflow_failure_rate":0.05,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":2},
-            {"run_id":"run_38976","pipeline_name":"security-scan",      "repo":"ClickHouse/ClickHouse",      "head_branch":"feature/new-codec","trigger_type":"push",             "workflow_failure_rate":0.44,"failures_last_7_runs":3,"prev_run_status":"failure","retry_count":2,"concurrent_runs":7},
-            {"run_id":"run_71234","pipeline_name":"integration-test",   "repo":"ClickHouse/clickhouse-go",   "head_branch":"main",             "trigger_type":"pull_request",     "workflow_failure_rate":0.11,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":3},
-            {"run_id":"run_29845","pipeline_name":"deploy-staging",     "repo":"ClickHouse/ClickHouse",      "head_branch":"fix/memory-leak",  "trigger_type":"workflow_dispatch","workflow_failure_rate":0.78,"failures_last_7_runs":5,"prev_run_status":"failure","retry_count":3,"concurrent_runs":10},
-            {"run_id":"run_63571","pipeline_name":"benchmark-run",      "repo":"ClickHouse/ClickHouse",      "head_branch":"main",             "trigger_type":"schedule",         "workflow_failure_rate":0.09,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":2},
-            {"run_id":"run_44892","pipeline_name":"release-build",      "repo":"ClickHouse/ClickHouse",      "head_branch":"release/24.1",     "trigger_type":"push",             "workflow_failure_rate":0.22,"failures_last_7_runs":1,"prev_run_status":"success","retry_count":0,"concurrent_runs":5},
-            {"run_id":"run_87123","pipeline_name":"build-and-test",     "repo":"ClickHouse/dbt-clickhouse",  "head_branch":"main",             "trigger_type":"push",             "workflow_failure_rate":0.06,"failures_last_7_runs":0,"prev_run_status":"success","retry_count":0,"concurrent_runs":1},
-            {"run_id":"run_52367","pipeline_name":"backport-pr",        "repo":"ClickHouse/ClickHouse",      "head_branch":"backport/23.8",    "trigger_type":"pull_request",     "workflow_failure_rate":0.58,"failures_last_7_runs":3,"prev_run_status":"failure","retry_count":1,"concurrent_runs":8},
+        DEMO_STREAM_RUNS = [_gen_synthetic_run() for _ in range(8)]
+        # Guarantee 2 HIGH risk and 1 MEDIUM risk runs for demo impact
+        DEMO_STREAM_RUNS += [
+            {**_gen_synthetic_run(), "workflow_failure_rate": round(random.uniform(0.72,0.90),2),
+             "failures_last_7_runs": random.randint(4,6), "prev_run_status": "failure",
+             "retry_count": random.randint(2,3), "concurrent_runs": random.randint(7,12)},
+            {**_gen_synthetic_run(), "workflow_failure_rate": round(random.uniform(0.68,0.85),2),
+             "failures_last_7_runs": random.randint(3,5), "prev_run_status": "failure",
+             "retry_count": random.randint(1,3), "concurrent_runs": random.randint(6,10)},
+            {**_gen_synthetic_run(), "workflow_failure_rate": round(random.uniform(0.40,0.55),2),
+             "failures_last_7_runs": random.randint(2,3), "prev_run_status": "failure",
+             "retry_count": 1, "concurrent_runs": random.randint(4,7)},
         ]
+        random.shuffle(DEMO_STREAM_RUNS)
 
         def score_demo(run):
             s = (run["workflow_failure_rate"]*3.5
@@ -1089,12 +1125,12 @@ elif page=="Root Cause Analysis":
           </div>
         </div>''', unsafe_allow_html=True)
         st.markdown('<div class="rca-section-label">Quick Diagnosis</div>', unsafe_allow_html=True)
-        st.markdown('<div class="rca-qq-wrap">', unsafe_allow_html=True)
+        quick_qs=[" Why is this failing?"," How do I fix it?"," Is it safe to run?"," Top risk signals?"]
+        quick_qs_clean=["Why is this failing?","How do I fix it?","Is it safe to run?","Top risk signals?"]
         btn_cols=st.columns(4)
-        quick_qs=["Why is this failing?","How do I fix it?","Is it safe to run?","Top risk signals?"]
         for i,q_text in enumerate(quick_qs):
             with btn_cols[i]:
-                if st.button(q_text,key=f"qq{i}",use_container_width=True):
+                if st.button(q_text,key=f"qq{i}",use_container_width=True,type="primary"):
                     st.session_state.chat.append({"role":"user","content":q_text})
                     with st.spinner("Analyzing…"): time.sleep(0.5); ans=rag_chat_response(q_text,active_run,prob)
                     st.session_state.chat.append({"role":"assistant","content":ans}); st.rerun()
