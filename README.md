@@ -88,7 +88,6 @@ Both services are deployed on GCP Cloud Run and publicly accessible.
 | Service | URL |
 |---------|-----|
 | **Kairos Pulse — Streamlit Dashboard** | https://pipeline-autopilot-frontend-60271318606.us-central1.run.app |
-| **FastAPI Prediction Backend** | https://pipeline-autopilot-60271318606.us-central1.run.app |
 
 ### Quick Health Check
 
