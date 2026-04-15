@@ -529,11 +529,6 @@ All splits are stratified on `failed` to preserve the ~11.33% failure rate.
 |--------|-------|
 | Train Accuracy | 96.46% |
 | Test Accuracy | 93.39% |
-| AUC-ROC | 98.08% |
-| AUC-PR | 87.12% |
-| Precision | 65.21% |
-| Recall | 89.37% |
-| F1 Score | 75.40% |
 
 The decision threshold is set at **0.75**, optimised for the precision-recall balance required in a CI/CD environment where false positives (blocking a safe run) carry a meaningful cost.
 
@@ -986,10 +981,7 @@ Verify the GitHub PAT has `repo` and `workflow` read scopes. The app will automa
 
 - **GitHub Repository:** https://github.com/anita2210/pipeline-autopilot
 - **Kairos Pulse Dashboard:** https://pipeline-autopilot-frontend-60271318606.us-central1.run.app
-- **FastAPI Backend:** https://pipeline-autopilot-60271318606.us-central1.run.app
 - **Airflow UI:** http://localhost:8080 (local only)
 - **MLflow UI:** http://localhost:5000 (local only)
 
 ---
-
-*Pipeline Autopilot — MLOps Course Project, Google Cambridge Showcase, April 2026*
