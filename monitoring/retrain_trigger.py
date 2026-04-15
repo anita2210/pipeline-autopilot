@@ -57,9 +57,9 @@ AIRFLOW_USERNAME = "airflow"
 AIRFLOW_PASSWORD = "airflow"
 
 # Email config (set via environment or update directly)
-ALERT_EMAIL_TO = "team@pipelineautopilot.com"
-SMTP_HOST = "localhost"
-SMTP_PORT = 25
+ALERT_EMAIL_TO = "pipelineguard.alerts@gmail.com"
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = 587
 
 
 # ---------------------------------------------------------------------------

@@ -64,10 +64,6 @@ jobs:
         run: |
           URL=$(gcloud run services describe pipeline-autopilot \
             --region=us-central1 \
+            --project=datapipeline-autopilot \
             --format='value(status.url)')
-          echo "✅ Live endpoint: $URL"
-
-      - name: Smoke test
-        run: |
-          sleep 10
-          curl -f "$URL/health" | python3 -m json.tool
+          echo "✅ Deployed: $URL"

@@ -1,0 +1,18 @@
+[
+  "day_of_week",
+  "hour",
+  "is_weekend",
+  "duration_seconds",
+  "avg_duration_7_runs",
+  "duration_deviation",
+  "prev_run_status",
+  "failures_last_7_runs",
+  "workflow_failure_rate",
+  "hours_since_last_run",
+  "total_jobs",
+  "retry_count",
+  "concurrent_runs",
+  "is_main_branch",
+  "is_first_run",
+  "is_bot_triggered"
+]

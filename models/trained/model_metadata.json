@@ -1,36 +1,62 @@
 {
-  "best_model_name": "xgboost_default",
-  "model_path": "/opt/airflow/models/trained/best_model.joblib",
-  "trained_at": "2026-03-24T23:03:38.549134",
-  "val_metrics": {
-    "auc_roc": 0.999919,
-    "auc_pr": 0.999373,
-    "f1": 0.98751,
-    "precision": 0.982906,
-    "recall": 0.992157,
-    "accuracy": 0.997156
-  },
+  "model_name": "XGBoost Tuned",
+  "trained_at": "2026-04-09T12:17:42.527068",
   "test_metrics": {
-    "auc_roc": 0.999892,
-    "auc_pr": 0.999151,
-    "f1": 0.982886,
-    "precision": 0.974923,
-    "recall": 0.99098,
-    "accuracy": 0.996089
+    "model": "XGBoost Tuned",
+    "accuracy": 0.9339,
+    "precision": 0.6521,
+    "recall": 0.8937,
+    "f1": 0.754,
+    "auc_roc": 0.9808,
+    "auc_pr": 0.8712
   },
-  "best_params": {
-    "model": "xgboost_default",
-    "n_estimators": 300,
-    "max_depth": 6,
-    "learning_rate": 0.1,
-    "subsample": 0.8,
-    "colsample_bytree": 0.8,
-    "scale_pos_weight": 7.824
-  },
-  "validation_auc_all": {
-    "logistic_regression": 0.99833,
-    "random_forest": 0.999854,
-    "xgboost_default": 0.999919,
-    "xgboost_tuned": 0.999913
+  "model_path": "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\trained\\best_model.joblib",
+  "scaler_path": "C:\\Users\\Ani\\OneDrive\\Desktop\\Data Pipeline Autopilot\\models\\trained\\scaler.joblib",
+  "all_model_metrics": {
+    "Logistic Regression": {
+      "model": "Logistic Regression",
+      "accuracy": 0.8916,
+      "precision": 0.5127,
+      "recall": 0.8733,
+      "f1": 0.6461,
+      "auc_roc": 0.959,
+      "auc_pr": 0.7514
+    },
+    "Random Forest": {
+      "model": "Random Forest",
+      "accuracy": 0.9041,
+      "precision": 0.5424,
+      "recall": 0.9839,
+      "f1": 0.6993,
+      "auc_roc": 0.9786,
+      "auc_pr": 0.8514
+    },
+    "XGBoost Default": {
+      "model": "XGBoost Default",
+      "accuracy": 0.9265,
+      "precision": 0.6173,
+      "recall": 0.9247,
+      "f1": 0.7403,
+      "auc_roc": 0.9799,
+      "auc_pr": 0.8677
+    },
+    "XGBoost Tuned": {
+      "model": "XGBoost Tuned",
+      "accuracy": 0.9339,
+      "precision": 0.6521,
+      "recall": 0.8937,
+      "f1": 0.754,
+      "auc_roc": 0.9808,
+      "auc_pr": 0.8712
+    },
+    "MLP Neural Network": {
+      "model": "MLP Neural Network",
+      "accuracy": 0.9364,
+      "precision": 0.7416,
+      "recall": 0.6741,
+      "f1": 0.7062,
+      "auc_roc": 0.9733,
+      "auc_pr": 0.8277
+    }
   }
 }
