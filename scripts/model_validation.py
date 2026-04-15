@@ -48,6 +48,7 @@ warnings.filterwarnings("ignore")
 # ---------------------------------------------------------------------------
 sys.path.append(str(Path(__file__).resolve().parents[1]))
 from scripts.config import (
+    BASE_DIR,
     LOGGING_CONFIG,
     PROCESSED_DATA_DIR,
     REPORTS_DIR,
