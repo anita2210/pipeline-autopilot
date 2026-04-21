@@ -88,6 +88,8 @@ Both services are deployed on GCP Cloud Run and publicly accessible.
 | Service | URL |
 |---------|-----|
 | **Kairos Pulse — Streamlit Dashboard** | https://pipeline-autopilot-frontend-60271318606.us-central1.run.app |
+| **FastAPI Prediction Backend** | https://pipeline-autopilot-60271318606.us-central1.run.app/health |
+| **FastAPI API Documentation** | https://pipeline-autopilot-60271318606.us-central1.run.app/docs |
 
 ### Quick Health Check
 
@@ -975,11 +977,12 @@ The service scales to zero when idle. The first request after a cold start may t
 Verify the GitHub PAT has `repo` and `workflow` read scopes. The app will automatically fall back to demo data if the token is missing or invalid.
 
 ---
-
 ## Links
 
 - **GitHub Repository:** https://github.com/anita2210/pipeline-autopilot
 - **Kairos Pulse Dashboard:** https://pipeline-autopilot-frontend-60271318606.us-central1.run.app
+- **FastAPI Backend:** https://pipeline-autopilot-60271318606.us-central1.run.app/health
+- **FastAPI Docs:** https://pipeline-autopilot-60271318606.us-central1.run.app/docs
 - **Airflow UI:** http://localhost:8080 (local only)
 - **MLflow UI:** http://localhost:5000 (local only)
 
